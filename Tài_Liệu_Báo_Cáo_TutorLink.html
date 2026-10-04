@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>TutorLink - Tài Liệu Báo Cáo Dự Án</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 14mm 14mm 16mm 14mm;
+            @bottom-right {
+                content: counter(page);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            background: #ffffff;
+            line-height: 1.55;
+            font-size: 13.5px;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Cover Header */
+        .doc-header {
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 20px;
+            margin-bottom: 24px;
+        }
+
+        .project-tag {
+            display: inline-block;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid #bfdbfe;
+            margin-bottom: 8px;
+        }
+
+        h1.title {
+            color: #0f172a;
+            font-size: 26px;
+            margin: 4px 0 10px 0;
+            font-weight: 800;
+            line-height: 1.3;
+        }
+
+        .subtitle {
+            color: #475569;
+            font-size: 14.5px;
+            margin-bottom: 14px;
+        }
+
+        /* Badges Bar */
+        .badges-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .badge-chip {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 9px;
+            border-radius: 6px;
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .bg-blue { background: #2563eb; }
+        .bg-green { background: #16a34a; }
+        .bg-orange { background: #ea580c; }
+        .bg-purple { background: #7c3aed; }
+        .bg-indigo { background: #4f46e5; }
+        .bg-emerald { background: #059669; }
+
+        /* Typography & Headings */
+        h2 {
+            color: #0f172a;
+            font-size: 18px;
+            font-weight: 700;
+            border-left: 4px solid #2563eb;
+            padding-left: 10px;
+            margin: 24px 0 12px 0;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            color: #1e3a8a;
+            font-size: 14.5px;
+            font-weight: 700;
+            margin: 16px 0 8px 0;
+            page-break-after: avoid;
+        }
+
+        p {
+            margin: 0 0 10px 0;
+            text-align: justify;
+        }
+
+        /* Cards & Highlights */
+        .highlight-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 14px;
+            page-break-inside: avoid;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+            page-break-inside: avoid;
+        }
+
+        .feature-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-left: 3px solid #2563eb;
+            border-radius: 6px;
+            padding: 10px 12px;
+        }
+
+        .feature-box h4 {
+            margin: 0 0 4px 0;
+            font-size: 13px;
+            color: #0f172a;
+        }
+
+        .feature-box p {
+            margin: 0;
+            font-size: 12px;
+            color: #475569;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0 16px 0;
+            font-size: 12px;
+            page-break-inside: avoid;
+        }
+
+        table th {
+            background: #1e293b;
+            color: #ffffff;
+            text-align: left;
+            padding: 7px 10px;
+            font-weight: 600;
+        }
+
+        table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+        }
+
+        table tr:nth-child(even) td {
+            background: #f8fafc;
+        }
+
+        .status-pill {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .pill-pass { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .pill-role { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+
+        /* Code Blocks */
+        pre {
+            background: #0f172a;
+            color: #f1f5f9;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 11px;
+            line-height: 1.45;
+            overflow: hidden;
+            margin: 10px 0;
+            page-break-inside: avoid;
+        }
+
+        code {
+            font-family: 'Consolas', monospace;
+            background: #f1f5f9;
+            color: #d97706;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        pre code {
+            background: transparent;
+            color: #f1f5f9;
+            padding: 0;
+        }
+
+        /* Schema Box */
+        .schema-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            page-break-inside: avoid;
+        }
+
+        .schema-box ul {
+            margin: 4px 0 0 16px;
+            padding: 0;
+            font-size: 12.5px;
+            color: #166534;
+        }
+
+        /* Footer Info */
+        .footer-note {
+            margin-top: 25px;
+            padding-top: 14px;
+            border-top: 1px solid #cbd5e1;
+            font-size: 11.5px;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <div class="doc-header">
+        <span class="project-tag">TÀI LIỆU BÁO CÁO TOÀN DIỆN DỰ ÁN</span>
+        <h1 class="title">🎓 TutorLink – Nền Tảng Kết Nối Học Sinh & Gia Sư Uy Tín Hàng Đầu</h1>
+        <div class="subtitle">Đồ án chuyên ngành Công nghệ Thông tin &bull; Phát triển ứng dụng Web Full-Stack</div>
+        <div class="badges-bar">
+            <span class="badge-chip bg-blue">Python 3.14+</span>
+            <span class="badge-chip bg-green">Django Framework 6.x</span>
+            <span class="badge-chip bg-orange">SQLite3 Database</span>
+            <span class="badge-chip bg-purple">Bootstrap 5 & Vanilla CSS</span>
+            <span class="badge-chip bg-indigo">Facebook Dark Mode Support</span>
+            <span class="badge-chip bg-emerald">15/15 Automated Tests Passed</span>
+        </div>
+    </div>
+
+    <!-- 1. Giới thiệu dự án -->
+    <h2>📌 1. Giới Thiệu Dự Án</h2>
+    <p>
+        <strong>TutorLink</strong> là nền tảng công nghệ giáo dục hiện đại, chuyên giải quyết bài toán kết nối gia sư và học sinh một cách minh bạch, an toàn và chuyên nghiệp. Khác biệt hoàn toàn với việc đăng tin rời rạc trên mạng xã hội dễ bị trôi bài hoặc đối mặt rủi ro lừa đảo, TutorLink xây dựng mô hình <strong>kết nối hai chiều thông minh</strong>:
+    </p>
+    <div class="feature-grid">
+        <div class="feature-box">
+            <h4>1. Học Sinh Chủ Động Tìm Gia Sư</h4>
+            <p>Tìm kiếm và lọc hồ sơ gia sư theo môn học, khu vực (tỉnh thành, quận huyện), mức giá, hình thức học (Online qua Google Meet/Zoom hoặc Offline). Xem chi tiết chứng chỉ, bằng cấp đã được kiểm duyệt và gửi yêu cầu học.</p>
+        </div>
+        <div class="feature-box">
+            <h4>2. Gia Sư Chủ Động Tìm Lớp</h4>
+            <p>Học sinh đăng bài tuyển gia sư kèm yêu cầu chi tiết. Các gia sư đạt chuẩn sẽ nộp đơn ứng tuyển kèm mức học phí đề xuất. Học sinh duyệt ứng viên và hệ thống tự động hoàn tất ghép lớp.</p>
+        </div>
+    </div>
+
+    <!-- 2. Tính năng nổi bật -->
+    <h2>✨ 2. Các Tính Năng Cốt Lõi Của Hệ Thống</h2>
+
+    <div class="highlight-card">
+        <h3>🌗 Chế Độ Giao Diện Sáng / Tối (Facebook Dark Mode)</h3>
+        <p>
+            - Tự động mở ở <strong>Giao diện Sáng (Light Mode)</strong> thanh lịch khi người dùng mới truy cập.<br>
+            - Hỗ trợ công tắc <code>[☀️ Sáng] [🌙 Tối]</code> phong cách Segmented Control cao cấp ngay trên Menu.<br>
+            - Dark Mode sử dụng bảng màu chuẩn <strong>Facebook</strong> (<code>#18191A</code>, <code>#242526</code>, <code>#3A3B3C</code>) giúp bảo vệ mắt khi học tập và làm việc buổi tối. Lưu trữ trạng thái thông minh qua <code>localStorage</code>.
+        </p>
+    </div>
+
+    <div class="feature-grid">
+        <div class="feature-box">
+            <h4>👨‍🎓 Phân Hệ Học Sinh (Student)</h4>
+            <p>&bull; Quản lý hồ sơ cá nhân và lịch sử học tập.<br>
+            &bull; Đăng bài cần tìm gia sư (Môn học, lớp, địa chỉ, mức học phí).<br>
+            &bull; Theo dõi trạng thái bài đăng & danh sách gia sư ứng tuyển.<br>
+            &bull; Duyệt ứng viên &rarr; Hệ thống tự động ghép lớp.<br>
+            &bull; Đánh giá chất lượng gia sư (1 - 5 sao kèm nhận xét).</p>
+        </div>
+        <div class="feature-box">
+            <h4>👨‍🏫 Phân Hệ Gia Sư (Tutor)</h4>
+            <p>&bull; Hồ sơ chuẩn mực: Bằng cấp, chứng chỉ, chuyên môn, kinh nghiệm.<br>
+            &bull; Huy hiệu "100% Đã Kiểm Duyệt" do Admin chứng thực.<br>
+            &bull; Tìm kiếm các lớp cần tuyển gia sư phù hợp với chuyên môn.<br>
+            &bull; Nộp đơn ứng tuyển kèm thư giới thiệu và mức giá.<br>
+            &bull; Quản lý tiến độ lớp đang dạy và đánh dấu hoàn thành.</p>
+        </div>
+    </div>
+
+    <div class="highlight-card">
+        <h3>🛡️ Phân Hệ Quản Trị Viên (Admin Portal)</h3>
+        <p>
+            - <strong>KPI Dashboard:</strong> Biểu đồ và thẻ số liệu thời gian thực về học sinh, gia sư, bài đăng, lớp đã ghép và doanh thu học phí.<br>
+            - <strong>Kiểm duyệt hồ sơ gia sư:</strong> Xem xét hồ sơ, bằng cấp, CMND/CCCD; chấp thuận duyệt hoặc từ chối kèm lý do.<br>
+            - <strong>Kiểm soát nội dung:</strong> Duyệt các bài đăng tìm lớp của học sinh, ngăn chặn spam hoặc vi phạm tiêu chuẩn.<br>
+            - <strong>Quản trị người dùng & đánh giá:</strong> Khóa tài khoản có hành vi gian lận và giám sát tính trung thực của các bài review.
+        </p>
+    </div>
+
+    <!-- 3. Kiến trúc thư mục -->
+    <h2>🏗️ 3. Kiến Trúc Hệ Thống & Cấu Trúc Mã Nguồn</h2>
+    <p>Dự án được cấu trúc theo chuẩn Module hóa phân tách tầng trách nhiệm (Separation of Concerns) của Django:</p>
+    <pre><code>Webgiasu/
+├── manage.py                   # Lệnh điều khiển chính của Django
+├── requirements.txt             # Thư viện phụ thuộc (Django, Pillow, Gunicorn, WhiteNoise)
+├── db.sqlite3                  # Cơ sở dữ liệu SQLite (95+ tài khoản và dữ liệu mẫu)
+├── test_flows.py               # Bộ kiểm thử tự động toàn diện (15 bài test 100% Pass)
+├── CHAY_TUTORLINK.bat          # File khởi động nhanh 1-Click tích hợp phát sóng Online
+├── share_online.py             # Trình điều khiển tạo link trực tuyến tạm thời tự động
+│
+├── config/                     # Cấu hình dự án (Settings, Routing, WSGI/ASGI)
+│   ├── settings.py             # Bảo mật, WhiteNoise static, trusted origins, databases
+│   └── urls.py                 # Định tuyến toàn bộ hệ thống
+│
+├── accounts/                   # Quản lý tài khoản & phân quyền (Role: student, tutor, admin)
+├── tutors/                     # Hồ sơ gia sư, môn học & chuyên ngành (Subject, TutorSubject)
+├── class_requests/             # Bài đăng tìm gia sư của học sinh (ClassRequest)
+├── applications/               # Đơn ứng tuyển nhận lớp của gia sư (Application)
+├── matched_classes/            # Lớp học đã kết nối thành công & đang giảng dạy (MatchedClass)
+├── reviews/                    # Hệ thống nhận xét & đánh giá chất lượng 5 sao (Review)
+├── dashboard/                  # Dashboard quản lý riêng biệt cho 3 nhóm đối tượng
+├── templates/                  # Hệ thống giao diện Django Templates (Responsive HTML5)
+└── static/                     # Tài nguyên tĩnh (CSS Variables, Dark mode, JS, Images)</code></pre>
+
+    <!-- 4. Thiết kế CSDL -->
+    <h2>🗄️ 4. Thiết Kế Cơ Sở Dữ Liệu (Database Schema)</h2>
+    <div class="schema-box">
+        <strong>Liên kết thực thể chính trong hệ thống:</strong>
+        <ul>
+            <li><code>User (Django Auth)</code> &harr; <code>UserProfile (1 - 1)</code>: Định danh vai trò (Học sinh / Gia sư / Admin).</li>
+            <li><code>UserProfile</code> &harr; <code>TutorProfile (1 - 1)</code>: Thông tin mở rộng bằng cấp, tiểu sử dành riêng cho gia sư.</li>
+            <li><code>TutorProfile</code> &harr; <code>Subject</code> qua bảng trung gian <code>TutorSubject (N - N)</code>.</li>
+            <li><code>UserProfile (Student)</code> &rarr; <code>ClassRequest (1 - N)</code>: Học sinh tạo nhiều bài đăng cần gia sư.</li>
+            <li><code>ClassRequest</code> &harr; <code>Application (1 - N)</code>: Nhiều gia sư có thể nộp đơn vào 1 bài đăng.</li>
+            <li><code>Application (Được duyệt)</code> &rarr; <code>MatchedClass (1 - 1)</code>: Tự động khởi tạo lớp học chính thức.</li>
+            <li><code>MatchedClass</code> &rarr; <code>Review (1 - 1)</code>: Học sinh gửi đánh giá sau khi hoàn thành khóa học.</li>
+        </ul>
+    </div>
+
+    <!-- 5. Danh sách tài khoản thử nghiệm -->
+    <h2>🔑 5. Danh Sách Tài Khoản Dùng Thử (Demo Accounts)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Vai trò</th>
+                <th>Tài khoản</th>
+                <th>Mật khẩu</th>
+                <th>Mục đích kiểm thử</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="status-pill pill-role">Quản Trị Viên</span></td>
+                <td><code>admin</code></td>
+                <td><code>admin123</code></td>
+                <td>Truy cập Admin Portal, xem biểu đồ KPI, duyệt hồ sơ gia sư, duyệt bài đăng</td>
+            </tr>
+            <tr>
+                <td><span class="status-pill pill-role">Học Sinh</span></td>
+                <td><code>hocsinh1</code></td>
+                <td><code>123456</code></td>
+                <td>Đăng bài tìm gia sư mới, duyệt đơn ứng tuyển, chấm 5 sao sau khi ghép lớp</td>
+            </tr>
+            <tr>
+                <td><span class="status-pill pill-role">Gia Sư Toán</span></td>
+                <td><code>giasu_toan</code></td>
+                <td><code>123456</code></td>
+                <td>Tìm lớp Toán cần tuyển, nộp đơn ứng tuyển, quản lý các lớp đang nhận dạy</td>
+            </tr>
+            <tr>
+                <td><span class="status-pill pill-role">Gia Sư Ngoại Ngữ</span></td>
+                <td><code>giasu_anh</code></td>
+                <td><code>123456</code></td>
+                <td>Thử nghiệm luồng hồ sơ gia sư môn Tiếng Anh và chứng chỉ IELTS</td>
+            </tr>
+            <tr>
+                <td><span class="status-pill pill-role">Gia Sư Tin Học</span></td>
+                <td><code>giasu_tin</code></td>
+                <td><code>123456</code></td>
+                <td>Thử nghiệm hồ sơ bộ môn Lập trình / Công nghệ thông tin</td>
+            </tr>
+            <tr>
+                <td><span class="status-pill pill-role">Gia Sư Chờ Duyệt</span></td>
+                <td><code>giasu_ly</code></td>
+                <td><code>123456</code></td>
+                <td>Dành cho Admin kiểm thử chức năng Phê duyệt hồ sơ gia sư mới</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- 6. Kiểm thử tự động -->
+    <h2>🧪 6. Kết Quả Kiểm Thử Luồng Tự Động (Automated Testing)</h2>
+    <p>
+        Dự án xây dựng bộ kiểm thử tự động độc lập <code>test_flows.py</code> mô phỏng đầy đủ một chu trình nghiệp vụ khép kín từ lúc mở web, học sinh đăng tin, gia sư nộp đơn, ghép lớp, kết thúc và chấm điểm:
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 8%;">STT</th>
+                <th style="width: 62%;">Hạng mục kiểm thử chức năng</th>
+                <th style="width: 15%;">Kết quả</th>
+                <th style="width: 15%;">Mã phản hồi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>01</td><td>Kiểm tra hiển thị Trang chủ (Home Page)</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>HTTP 200</td></tr>
+            <tr><td>02</td><td>Tìm kiếm & lọc danh sách gia sư (/tutors/)</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>HTTP 200</td></tr>
+            <tr><td>03</td><td>Danh sách bài đăng lớp cần gia sư (/classes/)</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>HTTP 200</td></tr>
+            <tr><td>04</td><td>Bảng điều khiển Học sinh (/student/dashboard/)</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>HTTP 200</td></tr>
+            <tr><td>05</td><td>Quản lý bài đăng của học sinh (/student/posts/)</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>HTTP 200</td></tr>
+            <tr><td>06</td><td>Quản lý danh sách lớp học của học sinh (/student/classes/)</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>HTTP 200</td></tr>
+            <tr><td>07</td><td>Luồng học sinh đăng bài tìm gia sư mới</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>ID: 80 Tạo mới</td></tr>
+            <tr><td>08</td><td>Bảng điều khiển Gia sư (/tutor/dashboard/)</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>HTTP 200</td></tr>
+            <tr><td>09</td><td>Quản lý danh sách lớp đang dạy của gia sư (/tutor/classes/)</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>HTTP 200</td></tr>
+            <tr><td>10</td><td>Luồng gia sư nộp đơn ứng tuyển vào lớp học</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>Nộp đơn thành công</td></tr>
+            <tr><td>11</td><td>Học sinh duyệt ứng viên &rarr; Hệ thống tự động ghép lớp</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>ID: 53 Ghép thành công</td></tr>
+            <tr><td>12</td><td>Cập nhật tiến độ & hoàn thành khóa học</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>ID: 53 Đã hoàn tất</td></tr>
+            <tr><td>13</td><td>Học sinh đánh giá 5 sao & nhận xét chất lượng gia sư</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>Đánh giá thành công</td></tr>
+            <tr><td>14</td><td>Kiểm tra toàn bộ 7 phân trang thuộc Quản trị viên (Admin)</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>7/7 HTTP 200</td></tr>
+            <tr><td>15</td><td>Quản trị viên phê duyệt hồ sơ gia sư chờ duyệt</td><td><span class="status-pill pill-pass">ĐẠT (PASS)</span></td><td>Cập nhật Approved</td></tr>
+        </tbody>
+    </table>
+
+    <!-- 7. Hướng dẫn khởi chạy -->
+    <h2>🚀 7. Hướng Dẫn Khởi Chạy Nhanh Dự Án</h2>
+    <div class="highlight-card">
+        <p><strong>🌟 Cách khởi chạy nhanh nhất trên Windows:</strong></p>
+        <p>
+            Nhấp đúp chuột vào file <code>CHAY_TUTORLINK.bat</code> tại thư mục gốc của dự án.<br>
+            - Hệ thống sẽ tự động khởi động máy chủ Django trên cổng <code>8000</code>.<br>
+            - Tự động thiết lập đường hầm phát sóng trực tuyến an toàn.<br>
+            - Tự động hiển thị và copy đường link vào Clipboard để bạn chia sẻ cho bất kỳ ai truy cập trên điện thoại, máy tính.
+        </p>
+    </div>
+
+    <!-- 8. Phân công nhiệm vụ nhóm -->
+    <h2>👥 8. Thành Viên Nhóm & Phân Công Nhiệm Vụ</h2>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 10%;">STT</th>
+                <th style="width: 25%;">Thành viên</th>
+                <th style="width: 30%;">Phụ trách module</th>
+                <th style="width: 35%;">Mô tả chi tiết công việc</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td><strong>Thành viên 1</strong></td>
+                <td>Trưởng nhóm & Hệ thống lõi</td>
+                <td>Thiết kế kiến trúc Django, Database Schema, phân quyền người dùng và kiểm soát bảo mật CSRF.</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><strong>Thành viên 2</strong></td>
+                <td>Module Học sinh (Student)</td>
+                <td>Xây dựng luồng đăng tin tìm gia sư, bộ lọc tìm kiếm đa tiêu chí theo môn học và địa bàn.</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td><strong>Thành viên 3</strong></td>
+                <td>Module Gia sư (Tutor)</td>
+                <td>Hồ sơ năng lực gia sư, quy trình nộp đơn ứng tuyển, theo dõi danh sách lớp học phù hợp.</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td><strong>Thành viên 4</strong></td>
+                <td>Ghép lớp & Đánh giá (Matching)</td>
+                <td>Thuật toán tự động ghép lớp học (MatchedClass), quản lý trạng thái và chức năng chấm điểm 5 sao.</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td><strong>Thành viên 5</strong></td>
+                <td>Admin Portal & Giao diện UX/UI</td>
+                <td>Thống kê KPI quản trị, Facebook Dark Mode, kiểm thử tự động 15 bài test toàn diện.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer-note">
+        Tài liệu được kết xuất tự động từ hệ thống TutorLink &bull; Bản quyền thuộc về Nhóm Phát Triển Đồ Án Công Nghệ Thông Tin &bull; 2026
+    </div>
+
+</body>
+</html>

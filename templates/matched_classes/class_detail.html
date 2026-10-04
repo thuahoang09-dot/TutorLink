@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lớp học {{ matched_class.subject.name }} – TutorLink{% endblock %}
+
+{% block content %}
+<div class="bg-white border-bottom py-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1">
+                        Môn {{ matched_class.subject.name }}
+                    </span>
+                    <span class="badge badge-status {% if matched_class.status == 'in_progress' %}status-in_progress{% elif matched_class.status == 'completed' %}status-completed{% else %}status-rejected{% endif %}">
+                        {{ matched_class.get_status_display }}
+                    </span>
+                </div>
+                <h1 class="h3 fw-bold mb-1">Chi Tiết Lớp Ghép: {{ matched_class.subject.name }}</h1>
+                <div class="text-muted small">
+                    <i class="bi bi-calendar3"></i> Bắt đầu ngày {{ matched_class.start_date|date:"d/m/Y" }} • 
+                    <i class="bi bi-laptop"></i> Hình thức: {{ matched_class.get_teaching_method_display }}
+                </div>
+            </div>
+
+            <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                {% if matched_class.status == 'in_progress' %}
+                    <div class="d-flex gap-2 justify-content-md-end">
+                        <form method="post" action="{% url 'matched_classes:complete_class' matched_class.id %}" onsubmit="return confirmAction('Xác nhận hoàn thành lớp học này?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check2-all"></i> Đánh dấu hoàn thành
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'matched_classes:cancel_class' matched_class.id %}" onsubmit="return confirmAction('Bạn có chắc muốn hủy lớp học này?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="bi bi-x-circle"></i> Hủy lớp
+                            </button>
+                        </form>
+                    </div>
+                {% elif matched_class.status == 'completed' and user == matched_class.student and not review %}
+                    <a href="{% url 'reviews:create_review' matched_class.id %}" class="btn btn-warning btn-lg fw-bold text-dark">
+                        <i class="bi bi-star-fill"></i> Viết Đánh Giá Gia Sư
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Thông tin hai bên (Học sinh & Gia sư) -->
+        <div class="col-lg-6">
+            <div class="card card-custom p-4 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                    <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-backpack4 me-2"></i> Học Sinh / Phụ Huynh</h5>
+                    <span class="badge badge-role badge-student">Học sinh</span>
+                </div>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <img src="{{ matched_class.student.profile.get_avatar_url }}" alt="student" class="avatar-img avatar-lg">
+                    <div>
+                        <h5 class="fw-bold mb-1">{{ matched_class.student.profile.full_name|default:matched_class.student.username }}</h5>
+                        <div class="text-muted small">Tài khoản: @{{ matched_class.student.username }}</div>
+                        {% if matched_class.grade %}
+                            <span class="badge bg-light text-primary border mt-1">{{ matched_class.grade }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column gap-2 text-secondary small">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div>
+                            <i class="bi bi-telephone-fill text-success me-2"></i> <strong>Số điện thoại:</strong> 
+                            <span class="text-dark fw-semibold">{{ matched_class.student.profile.phone|default:"Chưa cập nhật" }}</span>
+                        </div>
+                        {% if matched_class.student.profile.phone %}
+                        <div class="d-flex gap-1">
+                            <a href="tel:{{ matched_class.student.profile.phone }}" class="btn btn-sm btn-outline-success py-0 px-2" title="Gọi điện">
+                                <i class="bi bi-telephone"></i> Gọi
+                            </a>
+                            <a href="https://zalo.me/{{ matched_class.student.profile.phone }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" title="Nhắn Zalo">
+                                <i class="bi bi-chat-dots-fill"></i> Zalo
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <i class="bi bi-envelope-fill text-primary me-2"></i> <strong>Email:</strong> 
+                        {% if matched_class.student.email %}
+                            <a href="mailto:{{ matched_class.student.email }}" class="text-decoration-none">{{ matched_class.student.email }}</a>
+                        {% else %}
+                            <span class="text-muted">Chưa có email</span>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <i class="bi bi-geo-alt-fill text-danger me-2"></i> <strong>Địa chỉ liên hệ:</strong> 
+                        <span class="text-dark">{{ matched_class.student.profile.address|default:"Chưa cập nhật" }}</span>
+                    </div>
+
+                    {% if matched_class.location %}
+                    <div class="p-2 rounded bg-light border">
+                        <i class="bi bi-house-door-fill text-warning me-1"></i> <strong>Địa điểm học của lớp:</strong> 
+                        <span class="text-dark fw-medium">{{ matched_class.location }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if matched_class.request_note %}
+                    <div class="mt-2 pt-2 border-top">
+                        <span class="text-muted d-block mb-1"><strong><i class="bi bi-journal-text text-primary me-1"></i> Mục tiêu & Yêu cầu học tập:</strong></span>
+                        <div class="p-2 bg-light rounded border text-dark">
+                            {{ matched_class.request_note|linebreaksbr }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if matched_class.student.profile.bio %}
+                    <div class="mt-1">
+                        <span class="text-muted"><strong>Giới thiệu:</strong> {{ matched_class.student.profile.bio }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card card-custom p-4 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                    <h5 class="fw-bold mb-0 text-secondary"><i class="bi bi-person-video3 me-2"></i> Gia Sư Giảng Dạy</h5>
+                    <span class="badge badge-role badge-tutor">Gia sư</span>
+                </div>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <img src="{{ matched_class.tutor.profile.get_avatar_url }}" alt="tutor" class="avatar-img avatar-lg">
+                    <div>
+                        <h5 class="fw-bold mb-1">{{ matched_class.tutor.profile.full_name|default:matched_class.tutor.username }}</h5>
+                        <div class="text-muted small">
+                            <i class="bi bi-star-fill text-warning"></i> {{ matched_class.tutor.tutor_profile.get_average_rating }} • 
+                            {{ matched_class.tutor.tutor_profile.get_review_count }} đánh giá
+                        </div>
+                        {% if matched_class.tutor.tutor_profile.location %}
+                            <span class="text-muted small"><i class="bi bi-geo-alt text-danger"></i> {{ matched_class.tutor.tutor_profile.location }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column gap-2 text-secondary small">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div>
+                            <i class="bi bi-telephone-fill text-success me-2"></i> <strong>Số điện thoại:</strong> 
+                            <span class="text-dark fw-semibold">{{ matched_class.tutor.profile.phone|default:"Chưa cập nhật" }}</span>
+                        </div>
+                        {% if matched_class.tutor.profile.phone %}
+                        <div class="d-flex gap-1">
+                            <a href="tel:{{ matched_class.tutor.profile.phone }}" class="btn btn-sm btn-outline-success py-0 px-2" title="Gọi điện">
+                                <i class="bi bi-telephone"></i> Gọi
+                            </a>
+                            <a href="https://zalo.me/{{ matched_class.tutor.profile.phone }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" title="Nhắn Zalo">
+                                <i class="bi bi-chat-dots-fill"></i> Zalo
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <i class="bi bi-envelope-fill text-primary me-2"></i> <strong>Email:</strong> 
+                        {% if matched_class.tutor.email %}
+                            <a href="mailto:{{ matched_class.tutor.email }}" class="text-decoration-none">{{ matched_class.tutor.email }}</a>
+                        {% else %}
+                            <span class="text-muted">Chưa có email</span>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <i class="bi bi-mortarboard-fill text-primary me-2"></i> <strong>Học vấn:</strong> 
+                        <span class="text-dark">{{ matched_class.tutor.tutor_profile.education|default:"Chưa cập nhật" }}</span>
+                    </div>
+
+                    {% if matched_class.tutor.tutor_profile.experience %}
+                    <div>
+                        <i class="bi bi-briefcase-fill text-primary me-2"></i> <strong>Kinh nghiệm:</strong> 
+                        <span class="text-dark">{{ matched_class.tutor.tutor_profile.experience|default:"Chưa cập nhật" }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if matched_class.tutor.tutor_profile.introduction %}
+                    <div class="p-2 rounded bg-light border mt-1">
+                        <span class="text-muted d-block mb-1"><strong><i class="bi bi-chat-left-quote text-primary me-1"></i> Giới thiệu gia sư:</strong></span>
+                        <div class="text-dark">
+                            {{ matched_class.tutor.tutor_profile.introduction|linebreaksbr }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if matched_class.tutor.tutor_profile.certificate_file or matched_class.tutor.tutor_profile.certificate_link %}
+                    <div class="mt-1">
+                        <i class="bi bi-patch-check-fill text-success me-1"></i> <strong>Bằng cấp / Chứng chỉ:</strong>
+                        {% if matched_class.tutor.tutor_profile.certificate_file %}
+                            <a href="{{ matched_class.tutor.tutor_profile.certificate_file.url }}" target="_blank" class="badge bg-success-subtle text-success border text-decoration-none ms-1">
+                                <i class="bi bi-file-earmark-check"></i> Xem tệp đính kèm
+                            </a>
+                        {% endif %}
+                        {% if matched_class.tutor.tutor_profile.certificate_link %}
+                            <a href="{{ matched_class.tutor.tutor_profile.certificate_link }}" target="_blank" class="badge bg-primary-subtle text-primary border text-decoration-none ms-1">
+                                <i class="bi bi-box-arrow-up-right"></i> Link minh chứng
+                            </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mt-3 pt-3 border-top">
+                    <a href="{% url 'tutors:tutor_detail' matched_class.tutor.tutor_profile.id %}" target="_blank" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-box-arrow-up-right"></i> Xem hồ sơ đầy đủ của gia sư
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thỏa thuận lớp học -->
+        <div class="col-12">
+            <div class="card card-custom p-4">
+                <h5 class="fw-bold mb-3 border-bottom pb-2"><i class="bi bi-info-circle text-primary me-2"></i> Thông Tin & Thỏa Thuận Lớp Học</h5>
+                <div class="row g-4 text-secondary">
+                    <div class="col-md-3">
+                        <span class="text-muted small d-block">Môn học:</span>
+                        <strong class="text-dark fs-6">{{ matched_class.subject.name }}</strong>
+                        {% if matched_class.grade %}
+                            <span class="text-muted small">({{ matched_class.grade }})</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <span class="text-muted small d-block">Số buổi học:</span>
+                        <strong class="text-primary fs-6">{{ matched_class.sessions_per_week|default:"2-3 buổi/tuần" }}</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="text-muted small d-block">Học phí:</span>
+                        <strong class="text-danger fs-5">{{ matched_class.hourly_rate }} đ</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="text-muted small d-block">Hình thức dạy:</span>
+                        <strong class="text-dark fs-6">{{ matched_class.get_teaching_method_display }}</strong>
+                    </div>
+                    <div class="col-12 pt-2 border-top">
+                        <span class="text-muted small d-block"><i class="bi bi-clock-history text-primary me-1"></i>Thời gian học / Khung giờ:</span>
+                        <strong class="text-dark fs-6">{{ matched_class.schedule|default:"Trao đổi trực tiếp" }}</strong>
+                    </div>
+                    {% if matched_class.location %}
+                    <div class="col-12 pt-2 border-top">
+                        <span class="text-muted small d-block"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Địa điểm diễn ra lớp học:</span>
+                        <strong class="text-dark fs-6">{{ matched_class.location }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Khối Đánh giá (Review) -->
+        {% if review %}
+            <div class="col-12">
+                <div class="card card-custom p-4 bg-light border">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-chat-quote-fill text-warning me-2"></i> Đánh Giá Từ Học Sinh</h5>
+                        <div class="star-rating fs-5">
+                            {% for i in review.star_range %}
+                                <i class="bi bi-star-fill text-warning"></i>
+                            {% endfor %}
+                            {% for i in review.empty_star_range %}
+                                <i class="bi bi-star text-muted"></i>
+                            {% endfor %}
+                            <span class="ms-2 fw-bold text-dark fs-6">({{ review.rating }}/5 sao)</span>
+                        </div>
+                    </div>
+                    <p class="text-secondary mb-1" style="line-height: 1.6;">
+                        "{{ review.comment }}"
+                    </p>
+                    <div class="text-muted small mt-2">
+                        Đánh giá ngày {{ review.created_at|date:"d/m/Y H:i" }}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

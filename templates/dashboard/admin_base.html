@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+    <div class="row g-4">
+        <!-- Admin Sidebar -->
+        <div class="col-lg-3 col-xl-2">
+            <div class="card card-static p-3 mb-4">
+                <div class="d-flex align-items-center gap-2 mb-3 px-2">
+                    <i class="bi bi-shield-lock-fill text-danger fs-4"></i>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-danger">TRANG QUẢN TRỊ</h6>
+                        <small class="text-muted" style="font-size: 0.7rem;">Admin Control Center</small>
+                    </div>
+                </div>
+
+                <nav class="d-flex flex-column gap-1">
+                    <a href="{% url 'dashboard:admin_dashboard' %}" class="admin-nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                        <i class="bi bi-speedometer2"></i> Tổng quan
+                    </a>
+                    <a href="{% url 'dashboard:admin_users' %}" class="admin-nav-item {% if request.resolver_match.url_name == 'admin_users' %}active{% endif %}">
+                        <i class="bi bi-people"></i> Quản lý Tài khoản
+                    </a>
+                    <a href="{% url 'dashboard:admin_tutors' %}" class="admin-nav-item {% if request.resolver_match.url_name == 'admin_tutors' %}active{% endif %}">
+                        <i class="bi bi-person-check"></i> Duyệt Gia Sư
+                        {% if pending_tutor_approvals_count > 0 %}
+                            <span class="badge bg-danger ms-auto">{{ pending_tutor_approvals_count }}</span>
+                        {% endif %}
+                    </a>
+                    <a href="{% url 'dashboard:admin_posts' %}" class="admin-nav-item {% if request.resolver_match.url_name == 'admin_posts' %}active{% endif %}">
+                        <i class="bi bi-file-earmark-text"></i> Quản lý Bài Đăng
+                    </a>
+                    <a href="{% url 'dashboard:admin_classes' %}" class="admin-nav-item {% if request.resolver_match.url_name == 'admin_classes' %}active{% endif %}">
+                        <i class="bi bi-mortarboard"></i> Quản lý Lớp Ghép
+                    </a>
+                    <a href="{% url 'dashboard:admin_reviews' %}" class="admin-nav-item {% if request.resolver_match.url_name == 'admin_reviews' %}active{% endif %}">
+                        <i class="bi bi-star"></i> Quản lý Đánh Giá
+                    </a>
+                    <a href="{% url 'dashboard:admin_statistics' %}" class="admin-nav-item {% if request.resolver_match.url_name == 'admin_statistics' %}active{% endif %}">
+                        <i class="bi bi-graph-up-arrow"></i> Báo Cáo Thống Kê
+                    </a>
+                    <hr class="my-2 text-muted">
+                    <a href="/admin/" target="_blank" class="admin-nav-item text-muted">
+                        <i class="bi bi-sliders"></i> Django Admin <i class="bi bi-box-arrow-up-right ms-auto small"></i>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Admin Main Content Area -->
+        <div class="col-lg-9 col-xl-10">
+            {% block admin_content %}{% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}

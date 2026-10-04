@@ -1,0 +1,50 @@
+{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}Quản lý đánh giá – TutorLink Admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h3 class="fw-bold mb-1">Quản Lý Đánh Giá & Nhận Xét</h3>
+        <p class="text-muted small mb-0">Kiểm tra phản hồi của học sinh, xử lý hoặc xóa các đánh giá không chuẩn mực</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for rev in reviews %}
+        <div class="col-lg-6">
+            <div class="card card-custom p-4 h-100">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <div class="fw-bold text-dark">{{ rev.student.profile.full_name|default:rev.student.username }}</div>
+                        <div class="text-muted small">Đánh giá gia sư: <strong>{{ rev.tutor.profile.full_name|default:rev.tutor.username }}</strong></div>
+                    </div>
+                    <div class="star-rating">
+                        {% for i in rev.star_range %}<i class="bi bi-star-fill text-warning"></i>{% endfor %}
+                        <span class="fw-bold text-dark ms-1 small">({{ rev.rating }}★)</span>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-light rounded-3 border mb-3 small text-secondary">
+                    "{{ rev.comment }}"
+                </div>
+
+                <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">{{ rev.created_at|date:"d/m/Y H:i" }}</span>
+                    <form method="post" action="{% url 'dashboard:admin_delete_review' rev.id %}" onsubmit="return confirmAction('Bạn có chắc muốn xóa đánh giá này?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash"></i> Xóa đánh giá
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12 text-center py-5 text-muted">
+            Chưa có đánh giá nào trên hệ thống.
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

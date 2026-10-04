@@ -1,0 +1,651 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}TutorLink – Kết Nối Học Sinh Và Gia Sư Uy Tín Hàng Đầu{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<!-- Hero Promotional Banner Slider & Search Section -->
+<section class="hero-gradient pt-3 pb-5">
+    <div class="container">
+        <!-- ====================================================================
+             1. PROMOTIONAL BANNER CAROUSEL (ẢNH QUẢNG CÁO TỰ ĐỘNG CHUYỂN SLIDE)
+             HƯỚNG DẪN THAY ẢNH:
+             - Cách 1: Thay file ảnh trong static/images/banners/banner_1.jpg, banner_2.jpg
+             - Cách 2: Chèn thẻ <img src="đường_dẫn_ảnh_quảng_cáo"> vào bất kỳ slide nào bên dưới
+             ==================================================================== -->
+        <div id="promoBannerCarousel" class="carousel slide promo-carousel-container mb-4" data-bs-ride="carousel" data-bs-interval="4500">
+            <!-- Indicators -->
+            <div class="carousel-indicators promo-carousel-indicators">
+                <button type="button" data-bs-target="#promoBannerCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1: Banner ưu đãi"></button>
+                <button type="button" data-bs-target="#promoBannerCarousel" data-bs-slide-to="1" aria-label="Slide 2: Gia sư 1 kèm 1"></button>
+                <button type="button" data-bs-target="#promoBannerCarousel" data-bs-slide-to="2" aria-label="Slide 3: Học trực tuyến"></button>
+            </div>
+
+            <!-- Slides List -->
+            <div class="carousel-inner">
+                <!-- Slide 1 (Ảnh đầu tiên khi vào app): Ưu Đãi Đặc Biệt - Miễn Phí 100% Phí Kết Nối -->
+                <div class="carousel-item active">
+                    <a href="{% url 'class_requests:post_class' %}" class="d-block text-decoration-none">
+                        <div class="promo-banner-slide p-0 position-relative">
+                            <img src="{% static 'images/banners/banner_3.jpg' %}" alt="Ưu đãi kết nối gia sư TutorLink" class="promo-full-img img-fluid">
+                            <div class="position-absolute bottom-0 start-0 w-100 p-3.5 p-md-4 text-white" style="background: linear-gradient(to top, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.35) 70%, transparent 100%);">
+                                <span class="badge bg-warning text-dark px-3 py-1 fw-bold rounded-pill mb-1.5">Ưu Đãi Đặc Biệt</span>
+                                <h4 class="fw-bold mb-1 fs-5">Miễn Phí 100% Phí Kết Nối & Đăng Tin Tìm Gia Sư</h4>
+                                <p class="small text-white-50 mb-0 d-none d-sm-block">Hỗ trợ phụ huynh đổi gia sư miễn phí trong các buổi đầu nếu không phù hợp phương pháp học.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Slide 2: Gia sư 1 kèm 1 giúp con tiến bộ (Chuẩn phong cách HTcon) -->
+                <div class="carousel-item">
+                    <div class="promo-banner-slide promo-slide-bg-1 p-3.5 p-md-4 p-lg-5">
+                        <div class="row align-items-center g-4 w-100 mx-auto">
+                            <!-- Bên trái: Ảnh chụp gia sư dạy bé -->
+                            <div class="col-lg-6 col-md-5 text-center position-relative">
+                                <img src="{% static 'images/banners/banner_1.jpg' %}" alt="Gia sư 1 kèm 1 TutorLink" class="promo-banner-img img-fluid">
+                                <span class="position-absolute top-0 start-0 m-3 badge bg-primary text-white px-3 py-1.5 rounded-pill shadow-sm" style="font-size: 0.78rem;">
+                                    <i class="bi bi-patch-check-fill me-1"></i> Hồ sơ xác thực 100%
+                                </span>
+                            </div>
+
+                            <!-- Bên phải: Khẩu hiệu quảng cáo nổi bật -->
+                            <div class="col-lg-6 col-md-7 ps-lg-4">
+                                <div class="badge bg-warning-subtle text-dark border border-warning-subtle px-3 py-1 rounded-pill fw-semibold mb-2" style="font-size: 0.78rem;">
+                                    <i class="bi bi-star-fill text-warning me-1"></i> Nền tảng kết nối gia sư uy tín
+                                </div>
+                                <h2 class="promo-title-main">
+                                    GIA SƯ 1 KÈM 1<br>
+                                    <span class="text-primary">GIÚP CON HỌC TIẾN BỘ</span>
+                                </h2>
+                                <div class="promo-slogan-highlight">
+                                    <span class="promo-tag-red">CHẮC NỀN TẢNG</span>
+                                    <span class="text-muted">•</span>
+                                    <span class="promo-tag-blue">VỮNG TƯ DUY</span>
+                                    <span class="text-muted">•</span>
+                                    <span class="d-inline-flex align-items-center gap-1">
+                                        NẮM TRỌN ĐIỂM <span class="promo-score-badge">10</span>
+                                    </span>
+                                </div>
+                                <p class="text-secondary small mb-3.5" style="max-width: 520px; line-height: 1.55;">
+                                    Đội ngũ thầy cô và sinh viên xuất sắc từ các trường ĐH hàng đầu (FTU, Bách Khoa, Sư Phạm). Phương pháp dạy kèm 1-1 cá nhân hóa giúp học sinh bứt phá học lực thần tốc!
+                                </p>
+                                <div class="d-flex flex-wrap gap-2.5">
+                                    <a href="{% url 'tutors:tutor_list' %}" class="btn btn-primary fw-bold px-3.5 py-2 rounded-pill shadow-sm d-inline-flex align-items-center gap-2">
+                                        <i class="bi bi-search"></i> Tìm Gia Sư Cho Con
+                                    </a>
+                                    <a href="{% url 'class_requests:post_class' %}" class="btn btn-outline-primary fw-semibold px-3.5 py-2 rounded-pill d-inline-flex align-items-center gap-2">
+                                        <i class="bi bi-pencil-square"></i> Đăng Lớp Cần Gia Sư
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 3: Học tập thông minh, tự tin tỏa sáng -->
+                <div class="carousel-item">
+                    <div class="promo-banner-slide promo-slide-bg-2 p-3.5 p-md-4 p-lg-5">
+                        <div class="row align-items-center g-4 w-100 mx-auto">
+                            <!-- Bên trái: Chữ quảng cáo -->
+                            <div class="col-lg-6 col-md-7 pe-lg-4 order-2 order-md-1">
+                                <div class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 rounded-pill fw-semibold mb-2" style="font-size: 0.78rem;">
+                                    <i class="bi bi-laptop me-1"></i> Học Trực Tuyến & Tại Nhà Toàn Quốc
+                                </div>
+                                <h2 class="promo-title-main">
+                                    HỌC TẬP THÔNG MINH<br>
+                                    <span style="color: #0d9488;">TỰ TIN BỨT PHÁ TỎA SÁNG</span>
+                                </h2>
+                                <p class="text-secondary small mb-3.5" style="max-width: 520px; line-height: 1.55;">
+                                    Luyện thi vào 10, thi THPT Quốc gia, lấy chứng chỉ IELTS / TOEIC / Tin học quốc tế cùng các gia sư thủ khoa giàu kinh nghiệm và nhiệt huyết.
+                                </p>
+                                <div class="d-flex flex-wrap gap-2.5">
+                                    <a href="{% url 'class_requests:class_list' %}" class="btn btn-success fw-bold px-3.5 py-2 rounded-pill shadow-sm text-white d-inline-flex align-items-center gap-2">
+                                        <i class="bi bi-mortarboard-fill"></i> Dành Cho Gia Sư Nhận Lớp
+                                    </a>
+                                    <a href="{% url 'accounts:register' %}?role=tutor" class="btn btn-outline-secondary fw-semibold px-3.5 py-2 rounded-pill d-inline-flex align-items-center gap-2">
+                                        <i class="bi bi-person-plus-fill"></i> Đăng Ký Làm Gia Sư
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Bên phải: Ảnh quảng cáo gia sư trực tuyến -->
+                            <div class="col-lg-6 col-md-5 text-center order-1 order-md-2">
+                                <img src="{% static 'images/banners/banner_2.jpg' %}" alt="Học trực tuyến TutorLink" class="promo-banner-img img-fluid">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls (Nút bấm mũi tên chuyển slide) -->
+            <button class="carousel-control-prev promo-carousel-control" type="button" data-bs-target="#promoBannerCarousel" data-bs-slide="prev" aria-label="Banner trước">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="carousel-control-next promo-carousel-control" type="button" data-bs-target="#promoBannerCarousel" data-bs-slide="next" aria-label="Banner sau">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+
+        <!-- ====================================================================
+             2. QUICK SEARCH BAR (THANH TÌM KIẾM 2 CHIỀU ĐA NĂNG NGAY DƯỚI BANNER)
+             ==================================================================== -->
+        <!-- ====================================================================
+             2. QUICK SEARCH BAR (THANH TÌM KIẾM 2 CHIỀU ĐA NĂNG CAO CẤP)
+             ==================================================================== -->
+        <div class="card p-3.5 p-md-4 shadow-sm border bg-white hero-search-card mb-4">
+            <!-- Search Mode Switcher Tabs Header -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 pb-2.5 border-bottom">
+                <div class="search-mode-capsule" role="tablist">
+                    <button type="button" class="search-mode-btn active" id="tab-search-tutors" onclick="switchSearchMode('tutors')">
+                        <i class="bi bi-people-fill text-primary"></i>
+                        <span>Dành cho Phụ huynh (Tìm gia sư)</span>
+                    </button>
+                    <button type="button" class="search-mode-btn" id="tab-search-classes" onclick="switchSearchMode('classes')">
+                        <i class="bi bi-mortarboard-fill text-info"></i>
+                        <span>Dành cho Gia sư (Tìm lớp dạy)</span>
+                    </button>
+                </div>
+                <div class="d-none d-sm-flex align-items-center">
+                    <span id="hero-badge" class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1.5 rounded-pill fw-semibold" style="font-size: 0.78rem;">
+                        <i class="bi bi-patch-check-fill me-1" id="hero-badge-icon"></i><span id="hero-badge-text">Hồ sơ đã kiểm duyệt 100%</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Form Tìm Kiếm 4 Cột -->
+            <form id="hero-search-form" action="{% url 'tutors:tutor_list' %}" method="get">
+                <div class="row g-3 align-items-end">
+                    <!-- Cột 1: Môn học -->
+                    <div class="col-lg-4 col-md-12">
+                        <div class="search-field-box">
+                            <label id="hero-subject-label" class="search-field-label" for="id_subject_home">
+                                <span class="search-field-icon-badge bg-primary-subtle text-primary">
+                                    <i class="bi bi-book-half"></i>
+                                </span>
+                                <span>Môn học cần tìm</span>
+                            </label>
+                            <select name="subject" id="id_subject_home" class="form-select hero-custom-select">
+                                <option value="">Tất cả môn học (Toán, Văn, Anh, Lý, Hóa...)</option>
+                                {% for group in subject_groups %}
+                                    <optgroup label="{{ group.name }}">
+                                        {% for sub in group.subjects %}
+                                            <option value="{{ sub.id }}">{{ sub.name }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Cột 2: Tỉnh / Thành phố -->
+                    <div class="col-lg-3 col-md-5">
+                        <div class="search-field-box">
+                            <label class="search-field-label" for="id_location_home">
+                                <span class="search-field-icon-badge bg-danger-subtle text-danger">
+                                    <i class="bi bi-geo-alt-fill"></i>
+                                </span>
+                                <span>Tỉnh / Thành phố</span>
+                            </label>
+                            <select name="location" id="id_location_home" class="form-select hero-custom-select">
+                                <option value="">Tất cả tỉnh thành / Online</option>
+                                <option value="Online">🌐 Học Online (Toàn quốc)</option>
+                                <optgroup label="Thành phố lớn">
+                                    {% for city in popular_cities %}
+                                        <option value="{{ city }}">{{ city }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                                <optgroup label="Tất cả các tỉnh thành">
+                                    {% for prov in vietnam_provinces %}
+                                        {% if prov not in popular_cities %}
+                                            <option value="{{ prov }}">{{ prov }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Cột 3: Phường / Xã -->
+                    <div class="col-lg-3 col-md-4">
+                        <div class="search-field-box">
+                            <label class="search-field-label" for="id_district_home">
+                                <span class="search-field-icon-badge bg-info-subtle text-info">
+                                    <i class="bi bi-pin-map-fill"></i>
+                                </span>
+                                <span>Phường / Xã</span>
+                            </label>
+                            <select name="district" id="id_district_home" class="form-select hero-custom-select">
+                                <option value="">Tất cả phường / xã</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Cột 4: Nút Tìm Kiếm -->
+                    <div class="col-lg-2 col-md-3">
+                        <button type="submit" id="hero-submit-btn" class="btn hero-search-btn-main w-100">
+                            <i class="bi bi-search" id="hero-submit-icon"></i>
+                            <span id="hero-submit-text">Tìm Gia Sư</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Counter Section -->
+<section class="py-4 bg-white border-bottom">
+    <div class="container">
+        <div class="row g-3 text-center">
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-3 border bg-light h-100 d-flex flex-column align-items-center justify-content-center">
+                    <div class="fs-3 fw-extrabold text-primary mb-0.5">{{ total_tutors|default:"120" }}+</div>
+                    <div class="text-secondary small fw-medium">Gia Sư Đạt Chuẩn</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-3 border bg-light h-100 d-flex flex-column align-items-center justify-content-center">
+                    <div class="fs-3 fw-extrabold text-info mb-0.5">{{ total_classes|default:"350" }}+</div>
+                    <div class="text-secondary small fw-medium">Lớp Học Đã Ghép</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-3 border bg-light h-100 d-flex flex-column align-items-center justify-content-center">
+                    <div class="fs-3 fw-extrabold text-warning mb-0.5">99%</div>
+                    <div class="text-secondary small fw-medium">Phụ Huynh Hài Lòng</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="p-3 rounded-3 border bg-light h-100 d-flex flex-column align-items-center justify-content-center">
+                    <div class="fs-3 fw-extrabold text-success mb-0.5">24/7</div>
+                    <div class="text-secondary small fw-medium">Hỗ Trợ Kết Nối Nhanh</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Two-Way Workflow Section -->
+<section class="py-5" style="background-color: var(--bg-main);">
+    <div class="container py-4">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1.5 rounded-pill fw-semibold">Quy Trình 2 Chiều</span>
+            <h2 class="mt-2 fw-bold">Cách Thức Hoạt Động Của TutorLink</h2>
+            <p class="text-muted">Linh hoạt lựa chọn cách thức phù hợp nhất để tìm kiếm hoặc cung cấp dịch vụ gia sư.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Flow 1 -->
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm p-4 p-md-5" style="border-radius: 18px; border-left: 5px solid var(--primary) !important;">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="bg-primary text-white rounded-circle p-3 d-flex align-items-center justify-content-center fs-4 flex-shrink-0" style="width: 50px; height: 50px;">
+                            <i class="bi bi-search"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1 text-primary">Chiều 1: Học Sinh Chọn Gia Sư</h4>
+                            <div class="text-muted small">Chủ động lựa chọn hồ sơ gia sư ưng ý</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px;">1</span>
+                            <div><strong>Tìm kiếm & Lọc:</strong> Học sinh lọc gia sư theo môn, mức giá, khu vực.</div>
+                        </div>
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px;">2</span>
+                            <div><strong>Xem hồ sơ chi tiết:</strong> Đọc lý lịch, đánh giá sao của các học sinh trước.</div>
+                        </div>
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px;">3</span>
+                            <div><strong>Gửi yêu cầu học trực tiếp:</strong> Nhập lịch học và ghi chú mong muốn.</div>
+                        </div>
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px;">4</span>
+                            <div><strong>Ghép lớp & Bắt đầu:</strong> Gia sư đồng ý, lớp học được kích hoạt.</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top">
+                        <a href="{% url 'tutors:tutor_list' %}" class="btn btn-outline-primary btn-sm">
+                            Xem danh sách gia sư <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flow 2 -->
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm p-4 p-md-5" style="border-radius: 18px; border-left: 5px solid var(--primary) !important;">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="bg-primary text-white rounded-circle p-3 d-flex align-items-center justify-content-center fs-4 flex-shrink-0" style="width: 50px; height: 50px;">
+                            <i class="bi bi-megaphone"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1 text-primary">Chiều 2: Gia Sư Ứng Tuyển Lớp</h4>
+                            <div class="text-muted small">Đăng tin nhu cầu, nhận báo giá từ gia sư</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px;">1</span>
+                            <div><strong>Đăng bài tìm gia sư:</strong> Học sinh điền môn, khối lớp, ngân sách và thời gian.</div>
+                        </div>
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px;">2</span>
+                            <div><strong>Gia sư xem & ứng tuyển:</strong> Các gia sư xem lớp và gửi thông điệp nhận lớp.</div>
+                        </div>
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px;">3</span>
+                            <div><strong>Học sinh chọn ứng viên:</strong> Xem danh sách ứng viên, so sánh và bấm Chấp nhận.</div>
+                        </div>
+                        <div class="d-flex gap-3 align-items-start">
+                            <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 28px; height: 28px;">4</span>
+                            <div><strong>Tạo lớp & Đánh giá:</strong> Lớp học bắt đầu, sau khi học xong học sinh đánh giá.</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top">
+                        <a href="{% url 'class_requests:post_class' %}" class="btn btn-outline-primary btn-sm">
+                            Đăng tin tìm gia sư ngay <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Tutors Section -->
+<section class="py-5 bg-white">
+    <div class="container py-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+            <div>
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1.5 rounded-pill fw-semibold">Được Kiểm Duyệt</span>
+                <h2 class="mt-2 fw-bold">Gia Sư Nổi Bật</h2>
+                <p class="text-muted mb-0">Các thầy cô và sinh viên xuất sắc có thành tích vượt trội & đánh giá cao.</p>
+            </div>
+            <a href="{% url 'tutors:tutor_list' %}" class="btn btn-outline-primary mt-3 mt-md-0">
+                Xem tất cả gia sư <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for tutor in featured_tutors %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card card-custom h-100 p-4">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <img src="{{ tutor.avatar_url }}" class="avatar-img avatar-lg" alt="{{ tutor.full_name }}">
+                            <div>
+                                <h5 class="mb-1 text-dark">{{ tutor.full_name }}</h5>
+                                <div class="text-muted small"><i class="bi bi-geo-alt"></i> {{ tutor.location }}</div>
+                                <div class="star-rating small mt-1">
+                                    <i class="bi bi-star-fill"></i>
+                                    <span class="fw-bold text-dark ms-1">{{ tutor.get_average_rating }}</span>
+                                    <span class="text-muted">({{ tutor.get_review_count }} đánh giá)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="small text-muted mb-1"><i class="bi bi-mortarboard me-1"></i> {{ tutor.education|truncatechars:50 }}</div>
+                            <p class="text-secondary small mb-0">{{ tutor.introduction|truncatechars:100|default:"Gia sư giàu kinh nghiệm, nhiệt tình và phương pháp giảng dạy hiện đại." }}</p>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-1 mb-3">
+                            {% for sub in tutor.subjects.all %}
+                                <span class="badge bg-light text-primary border small">{{ sub.name }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted small">Học phí:</span>
+                                <div class="fw-bold text-primary">{{ tutor.price_per_hour|default:150000 }} đ<small class="text-muted">/h</small></div>
+                            </div>
+                            <a href="{% url 'tutors:tutor_detail' tutor.id %}" class="btn btn-primary btn-sm">
+                                Xem hồ sơ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-5 text-muted">
+                    <i class="bi bi-people fs-1 d-block mb-2"></i>
+                    Đang cập nhật danh sách gia sư nổi bật. Hãy quay lại sau!
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Mid-Page Promotional Banner Section (Vị trí quảng cáo giữa trang) -->
+<section class="py-3 bg-white">
+    <div class="container">
+        <div class="promo-carousel-container shadow-sm p-0 position-relative" style="border-radius: 18px; overflow: hidden;">
+            <a href="{% url 'class_requests:post_class' %}" class="d-block text-decoration-none">
+                <div class="row g-0 align-items-center" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #0d9488 100%);">
+                    <div class="col-lg-8 col-md-7 p-4 p-lg-5 text-white">
+                        <span class="badge bg-warning text-dark px-3 py-1.5 rounded-pill fw-bold mb-2">Dành Riêng Cho Phụ Huynh</span>
+                        <h3 class="fw-bold mb-2" style="font-size: clamp(1.2rem, 1.5vw + 0.6rem, 1.85rem);">
+                            Chưa Tìm Được Gia Sư Phù Hợp Lịch Học Của Con?
+                        </h3>
+                        <p class="mb-3 text-white-50 small" style="max-width: 580px;">
+                            Đăng yêu cầu lớp học miễn phí chỉ với 2 phút. Hệ thống thông minh của TutorLink sẽ kết nối ngay các gia sư giỏi gần nhà hoặc dạy online ứng tuyển cho bạn lựa chọn!
+                        </p>
+                        <span class="btn btn-warning fw-bold text-dark px-4 py-2 rounded-pill shadow-sm">
+                            <i class="bi bi-pencil-square me-1"></i> Đăng Lớp Tìm Gia Sư Miễn Phí
+                        </span>
+                    </div>
+                    <div class="col-lg-4 col-md-5 text-center p-3 d-none d-md-block">
+                        <img src="{% static 'images/banners/banner_1.jpg' %}" alt="Quảng cáo TutorLink" class="img-fluid rounded-4 shadow" style="max-height: 220px; object-fit: cover;">
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Latest Class Requests Section -->
+<section class="py-5" style="background-color: var(--bg-main);">
+    <div class="container py-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+            <div>
+                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-1.5 rounded-pill fw-semibold">Cần Gia Sư Gấp</span>
+                <h2 class="mt-2 fw-bold">Lớp Mới Đăng Tuyển</h2>
+                <p class="text-muted mb-0">Học sinh đang tìm kiếm gia sư phù hợp. Gia sư có thể ứng tuyển ngay!</p>
+            </div>
+            <a href="{% url 'class_requests:class_list' %}" class="btn btn-outline-secondary mt-3 mt-md-0">
+                Xem tất cả lớp học <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            {% for cr in latest_class_requests %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card card-custom h-100 p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                            <div class="d-flex gap-1 flex-wrap">
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1">
+                                    {{ cr.subject.name|default:"Tổng hợp" }} • {{ cr.grade }}
+                                </span>
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 small fw-semibold">
+                                    <i class="bi bi-calendar-check me-1"></i>{{ cr.sessions_per_week|default:"2-3 buổi/tuần" }}
+                                </span>
+                            </div>
+                            <span class="badge badge-status status-pending">
+                                <i class="bi bi-hourglass-split"></i> {{ cr.get_status_display }}
+                            </span>
+                        </div>
+
+                        <h5 class="fw-bold my-2">
+                            <a href="{% url 'class_requests:class_detail' cr.id %}" class="text-decoration-none text-dark">
+                                {{ cr.title }}
+                            </a>
+                        </h5>
+
+                        <p class="text-muted small mb-3">
+                            {{ cr.description|truncatechars:90 }}
+                        </p>
+
+                        <div class="small d-flex flex-column gap-1 mb-3 text-secondary">
+                            <div><i class="bi bi-geo-alt text-danger me-1"></i> {{ cr.location }}</div>
+                            <div><i class="bi bi-calendar-check text-warning-emphasis me-1"></i> <strong>Số buổi:</strong> {{ cr.sessions_per_week|default:"2-3 buổi/tuần" }}</div>
+                            <div><i class="bi bi-clock text-primary me-1"></i> <strong>Thời gian:</strong> {{ cr.schedule }}</div>
+                            <div><i class="bi bi-laptop text-info me-1"></i> {{ cr.get_teaching_method_display }}</div>
+                        </div>
+
+                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-muted small">Thù lao:</span>
+                                <div class="fw-bold text-danger">{{ cr.budget }} đ<small class="text-muted">/{{ cr.get_budget_type_display }}</small></div>
+                            </div>
+                            <a href="{% url 'class_requests:class_detail' cr.id %}" class="btn btn-secondary btn-sm">
+                                Chi tiết & Ứng tuyển
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    Chưa có bài đăng tìm gia sư nào. Hãy là người đầu tiên đăng tin!
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose TutorLink Section -->
+<section class="py-5 bg-white border-top">
+    <div class="container py-2">
+        <div class="text-center max-w-700 mx-auto mb-4">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1.5 rounded-pill fw-semibold">Lợi Thế Vượt Trội</span>
+            <h2 class="mt-2 fw-bold" style="font-size: 1.75rem;">Vì Sao Hàng Ngàn Phụ Huynh & Gia Sư Tin Chọn TutorLink?</h2>
+            <p class="text-muted small">Cam kết mang lại trải nghiệm an tâm, minh bạch và hiệu quả cao nhất cho cả người học và người dạy.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 p-4 border rounded-4 text-center bg-light shadow-sm" style="transition: transform 0.25s ease;">
+                    <div class="bg-primary text-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 52px; height: 52px; font-size: 1.4rem;">
+                        <i class="bi bi-patch-check-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 fs-6">100% Hồ Sơ Kiểm Duyệt</h5>
+                    <p class="text-muted small mb-0">Tất cả gia sư đều phải xác thực CCCD, bằng cấp đại học hoặc thẻ sinh viên và chứng chỉ chuyên môn.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 p-4 border rounded-4 text-center bg-light shadow-sm" style="transition: transform 0.25s ease;">
+                    <div class="bg-info text-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 52px; height: 52px; font-size: 1.4rem;">
+                        <i class="bi bi-arrow-left-right"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 fs-6">Kết Nối 2 Chiều Linh Hoạt</h5>
+                    <p class="text-muted small mb-0">Phụ huynh chủ động tìm gia sư hoặc đăng bài; Gia sư tự do lựa chọn lớp dạy phù hợp lịch trình cá nhân.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 p-4 border rounded-4 text-center bg-light shadow-sm" style="transition: transform 0.25s ease;">
+                    <div class="bg-warning text-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 52px; height: 52px; font-size: 1.4rem;">
+                        <i class="bi bi-cash-coin"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 fs-6">Học Phí Rõ Ràng & Minh Bạch</h5>
+                    <p class="text-muted small mb-0">Giá niêm yết công khai theo buổi hoặc theo tháng. Tuyệt đối không phát sinh phụ phí ẩn hoặc trung gian cắt phế.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 p-4 border rounded-4 text-center bg-light shadow-sm" style="transition: transform 0.25s ease;">
+                    <div class="bg-success text-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 52px; height: 52px; font-size: 1.4rem;">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2 fs-6">Đổi Gia Sư Miễn Phí</h5>
+                    <p class="text-muted small mb-0">Nếu không phù hợp phương pháp học trong các buổi đầu, TutorLink hỗ trợ tìm và đổi gia sư khác hoàn toàn miễn phí.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section class="py-5" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #0d9488 100%); color: white; position: relative; overflow: hidden;">
+    <div class="container py-4 text-center position-relative" style="z-index: 2;">
+        <span class="badge bg-white bg-opacity-25 text-white border border-white border-opacity-25 px-3 py-1.5 rounded-pill fw-semibold mb-3">
+            Bắt đầu trải nghiệm ngay hôm nay
+        </span>
+        <h2 class="display-6 fw-bold mb-3" style="font-size: clamp(1.4rem, 1.8vw + 0.6rem, 2.1rem);">Bạn Đang Cần Tìm Gia Sư Hay Muốn Nhận Thêm Lớp Dạy?</h2>
+        <p class="lead mb-4 opacity-90 mx-auto" style="max-width: 680px; font-size: 1rem;">
+            Gia nhập cộng đồng hàng nghìn phụ huynh, học sinh và thầy cô tại TutorLink. Kết nối nhanh chóng, minh bạch và hoàn toàn trực tiếp!
+        </p>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a href="{% url 'class_requests:post_class' %}" class="btn btn-light btn-lg fw-bold text-primary px-4 shadow">
+                <i class="bi bi-pencil-square me-1"></i> Đăng Lớp Tìm Gia Sư (Phụ huynh)
+            </a>
+            <a href="{% url 'accounts:register' %}?role=tutor" class="btn btn-warning btn-lg fw-bold text-dark px-4 shadow">
+                <i class="bi bi-person-check-fill me-1"></i> Đăng Ký Làm Gia Sư
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function switchSearchMode(mode) {
+    const form = document.getElementById('hero-search-form');
+    const tabTutors = document.getElementById('tab-search-tutors');
+    const tabClasses = document.getElementById('tab-search-classes');
+    const submitText = document.getElementById('hero-submit-text');
+    const submitIcon = document.getElementById('hero-submit-icon');
+    const badgeIcon = document.getElementById('hero-badge-icon');
+    const badgeText = document.getElementById('hero-badge-text');
+    const subjectLabel = document.getElementById('hero-subject-label');
+
+    if (mode === 'classes') {
+        if (tabClasses) tabClasses.classList.add('active');
+        if (tabTutors) tabTutors.classList.remove('active');
+
+        if (form) form.action = "{% url 'class_requests:class_list' %}";
+        if (submitText) submitText.textContent = "Tìm Lớp Học";
+        if (submitIcon) submitIcon.className = "bi bi-briefcase-fill";
+        if (badgeIcon) badgeIcon.className = "bi bi-lightning-charge-fill text-warning me-1";
+        if (badgeText) badgeText.textContent = "Cần gia sư mới nhất";
+        if (subjectLabel) {
+            subjectLabel.innerHTML = '<span class="search-field-icon-badge bg-info-subtle text-info"><i class="bi bi-mortarboard-fill"></i></span><span>Môn học lớp cần gia sư</span>';
+        }
+    } else {
+        if (tabTutors) tabTutors.classList.add('active');
+        if (tabClasses) tabClasses.classList.remove('active');
+
+        if (form) form.action = "{% url 'tutors:tutor_list' %}";
+        if (submitText) submitText.textContent = "Tìm Gia Sư";
+        if (submitIcon) submitIcon.className = "bi bi-search";
+        if (badgeIcon) badgeIcon.className = "bi bi-patch-check-fill text-success me-1";
+        if (badgeText) badgeText.textContent = "Hồ sơ đã kiểm duyệt 100%";
+        if (subjectLabel) {
+            subjectLabel.innerHTML = '<span class="search-field-icon-badge bg-primary-subtle text-primary"><i class="bi bi-book-half"></i></span><span>Môn học cần tìm</span>';
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    initLocationCascade(
+        document.getElementById('id_location_home'),
+        document.getElementById('id_district_home'),
+        ""
+    );
+
+    // Auto-detect tab from URL query params or hash
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tab') === 'classes' || urlParams.get('mode') === 'classes' || window.location.hash === '#tim-lop') {
+        switchSearchMode('classes');
+    }
+});
+</script>
+{% endblock %}

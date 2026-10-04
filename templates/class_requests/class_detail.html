@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ class_request.title }} – TutorLink{% endblock %}
+
+{% block content %}
+<div class="bg-white border-bottom py-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1">
+                        {{ class_request.subject.name }} • {{ class_request.grade }}
+                    </span>
+                    <span class="badge badge-status {% if class_request.status == 'pending' %}status-pending{% elif class_request.status == 'accepted' or class_request.status == 'closed' %}status-accepted{% else %}status-rejected{% endif %}">
+                        {{ class_request.get_status_display }}
+                    </span>
+                </div>
+                <h1 class="h3 fw-bold mb-1">{{ class_request.title }}</h1>
+                <div class="text-muted small">
+                    <span><i class="bi bi-clock"></i> Đăng ngày {{ class_request.created_at|date:"d/m/Y H:i" }}</span> •
+                    <span><i class="bi bi-person"></i> Bởi {{ class_request.student.profile.full_name|default:class_request.student.username }}</span>
+                </div>
+            </div>
+
+            <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                <div class="text-muted small">Thù lao đề xuất:</div>
+                <div class="h3 fw-bold text-danger mb-2">{{ class_request.budget }} đ<span class="fs-6 text-muted">/{{ class_request.get_budget_type_display }}</span></div>
+
+                {% if user.is_authenticated %}
+                    {% if user == class_request.student or user_profile.is_admin_user %}
+                        <div class="d-flex gap-2 justify-content-md-end">
+                            <a href="{% url 'class_requests:edit_class' class_request.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-pencil"></i> Sửa tin
+                            </a>
+                            {% if class_request.status == 'pending' %}
+                                <form method="post" action="{% url 'class_requests:close_class' class_request.id %}" class="d-inline" onsubmit="return confirmAction('Bạn có chắc muốn đóng bài đăng này?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-x-circle"></i> Đóng bài
+                                    </button>
+                                </form>
+                            {% endif %}
+                            <form method="post" action="{% url 'class_requests:delete_class' class_request.id %}" class="d-inline" onsubmit="return confirmAction('Bạn có chắc chắn muốn xóa bài đăng này không?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-trash"></i> Xóa
+                                </button>
+                            </form>
+                        </div>
+                    {% elif user_profile.is_tutor and class_request.status == 'pending' %}
+                        {% if has_applied %}
+                            <div class="alert alert-info py-2 px-3 mb-0 small d-inline-block">
+                                <i class="bi bi-check2-all"></i> Bạn đã ứng tuyển lớp này. Trạng thái: <strong>{{ my_application.get_status_display }}</strong>
+                            </div>
+                        {% elif not user.tutor_profile.is_profile_completed %}
+                            <button type="button" class="btn btn-secondary btn-lg shadow-sm" data-bs-toggle="modal" data-bs-target="#requireProfileModal">
+                                <i class="bi bi-send-fill"></i> Ứng Tuyển Nhận Lớp
+                            </button>
+                        {% elif user.tutor_profile.approval_status == 'pending' %}
+                            <button type="button" class="btn btn-secondary btn-lg shadow-sm" data-bs-toggle="modal" data-bs-target="#pendingApprovalModal">
+                                <i class="bi bi-send-fill"></i> Ứng Tuyển Nhận Lớp
+                            </button>
+                        {% elif user.tutor_profile.approval_status == 'rejected' %}
+                            <button type="button" class="btn btn-secondary btn-lg shadow-sm" data-bs-toggle="modal" data-bs-target="#rejectedApprovalModal">
+                                <i class="bi bi-send-fill"></i> Ứng Tuyển Nhận Lớp
+                            </button>
+                        {% else %}
+                            <button type="button" class="btn btn-secondary btn-lg shadow-sm" data-bs-toggle="modal" data-bs-target="#applyModal">
+                                <i class="bi bi-send-fill"></i> Ứng Tuyển Nhận Lớp
+                            </button>
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-secondary btn-lg">
+                        <i class="bi bi-box-arrow-in-right"></i> Đăng nhập để ứng tuyển
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Chi tiết yêu cầu -->
+            <div class="card card-custom p-4 mb-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-card-text text-primary me-2"></i> Nội Dung Yêu Cầu Chi Tiết</h5>
+                <p class="text-secondary" style="line-height: 1.8; white-space: pre-line;">
+                    {{ class_request.description }}
+                </p>
+            </div>
+
+            <!-- Nếu là chủ bài đăng (Học sinh) hoặc Admin: Hiển thị danh sách gia sư đã ứng tuyển -->
+            {% if user == class_request.student or user_profile.is_admin_user %}
+                <div class="card card-custom p-4" id="applications-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2">
+                        <div>
+                            <h5 class="fw-bold mb-0">
+                                <i class="bi bi-people-fill text-primary me-2"></i> Danh Sách Gia Sư Muốn Nhận Lớp ({{ applications.count }})
+                            </h5>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        {% for app in applications %}
+                            <div class="card p-3 border rounded-3 bg-light shadow-sm">
+                                <div class="row align-items-center">
+                                    <div class="col-md-7 d-flex align-items-center gap-3">
+                                        <img src="{{ app.tutor.profile.get_avatar_url }}" alt="{{ app.tutor.username }}" class="avatar-img avatar-lg rounded-circle" style="width: 56px; height: 56px; object-fit: cover;">
+                                        <div>
+                                            <h6 class="fw-bold mb-1">
+                                                <a href="{% url 'tutors:tutor_detail' app.tutor.tutor_profile.id %}" target="_blank" class="text-dark text-decoration-none">
+                                                    {{ app.tutor.profile.full_name|default:app.tutor.username }} <i class="bi bi-box-arrow-up-right small text-muted"></i>
+                                                </a>
+                                            </h6>
+                                            <div class="small text-muted mb-1">
+                                                <i class="bi bi-telephone text-primary"></i> {{ app.tutor.profile.phone|default:"Chưa có sđt" }} • 
+                                                <i class="bi bi-star-fill text-warning"></i> {{ app.tutor.tutor_profile.get_average_rating }} ({{ app.tutor.tutor_profile.get_review_count }} đánh giá)
+                                            </div>
+                                            <div class="small text-muted">
+                                                <i class="bi bi-mortarboard text-secondary"></i> {{ app.tutor.tutor_profile.education|truncatechars:45 }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                                        <div class="mb-2">
+                                            <span class="badge badge-status {% if app.status == 'accepted' %}status-accepted{% elif app.status == 'rejected' %}status-rejected{% else %}status-pending{% endif %}">
+                                                {{ app.get_status_display }}
+                                            </span>
+                                            {% if app.proposed_price %}
+                                                <span class="fw-bold text-danger ms-2">{{ app.proposed_price }} đ</span>
+                                            {% endif %}
+                                        </div>
+
+                                        {% if app.status == 'pending' and class_request.status == 'pending' %}
+                                            <div class="d-flex gap-2 justify-content-md-end flex-wrap">
+                                                <a href="{% url 'tutors:tutor_detail' app.tutor.tutor_profile.id %}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                    <i class="bi bi-person-lines-fill"></i> Xem hồ sơ
+                                                </a>
+                                                <form method="post" action="{% url 'applications:reject_application' app.id %}" onsubmit="return confirmAction('Từ chối gia sư này?');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                        <i class="bi bi-x-circle"></i> Từ chối
+                                                    </button>
+                                                </form>
+                                                <form method="post" action="{% url 'applications:accept_application' app.id %}" onsubmit="return confirmAction('Bạn có chắc chắn đồng ý chọn gia sư này và tiến hành ghép lớp ngay?');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-success btn-sm fw-bold shadow-sm px-3">
+                                                        <i class="bi bi-check-circle-fill me-1"></i> Duyệt & Ghép lớp ngay
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 pt-2 border-top small text-secondary">
+                                    <strong>Lời nhắn từ gia sư:</strong> {{ app.message|default:"Không có lời nhắn kèm theo." }}
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-1"></i>
+                                Chưa có gia sư nào ứng tuyển lớp này. Các gia sư đang duyệt danh sách lớp!
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-lg-4">
+            <div class="card card-custom p-4 sticky-top" style="top: 85px; z-index: 10;">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">Thông Tin Lớp Học</h5>
+
+                <div class="d-flex flex-column gap-3 mb-4 text-secondary small">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted"><i class="bi bi-book me-1"></i> Môn học:</span>
+                        <strong class="text-dark">{{ class_request.subject.name }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted"><i class="bi bi-layers me-1"></i> Khối lớp:</span>
+                        <strong>{{ class_request.grade }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted"><i class="bi bi-laptop me-1"></i> Hình thức:</span>
+                        <strong>{{ class_request.get_teaching_method_display }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted"><i class="bi bi-geo-alt me-1"></i> Địa điểm:</span>
+                        <strong>{{ class_request.location }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted"><i class="bi bi-calendar-check me-1"></i> Số buổi học:</span>
+                        <strong class="text-primary">{{ class_request.sessions_per_week|default:"2-3 buổi/tuần" }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted"><i class="bi bi-clock me-1"></i> Thời gian có thể học:</span>
+                        <strong>{{ class_request.schedule }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted"><i class="bi bi-people me-1"></i> Số lượt ứng tuyển:</span>
+                        <strong>{{ class_request.applications_count }} gia sư</strong>
+                    </div>
+                </div>
+
+                <!-- Info box for safety -->
+                <div class="p-3 bg-light rounded-3 border">
+                    <h6 class="fw-bold text-dark small mb-2"><i class="bi bi-shield-check text-success"></i> Hướng dẫn bảo đảm</h6>
+                    <p class="small text-muted mb-0">
+                        Học sinh và gia sư vui lòng trao đổi trực tiếp trên hệ thống TutorLink để được hỗ trợ giải quyết quyền lợi khi có phát sinh.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals dành cho Gia sư ứng tuyển -->
+{% if user.is_authenticated and user_profile.is_tutor and not has_applied and class_request.status == 'pending' %}
+
+    <!-- 1. Modal: Yêu cầu hoàn thiện hồ sơ gia sư trước khi nhận lớp -->
+    {% if not user.tutor_profile.is_profile_completed %}
+    <div class="modal fade" id="requireProfileModal" tabindex="-1" aria-labelledby="requireProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-warning-subtle border-bottom border-warning-subtle">
+                    <h5 class="modal-title fw-bold text-warning-emphasis d-flex align-items-center gap-2" id="requireProfileModalLabel">
+                        <i class="bi bi-person-exclamation fs-4"></i> Yêu Cầu Cập Nhật Hồ Sơ Gia Sư
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="text-center mb-3">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-warning-subtle text-warning-emphasis rounded-circle mb-2" style="width: 64px; height: 64px;">
+                            <i class="bi bi-file-earmark-person fs-1 text-warning"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark">Bạn chưa đăng ký hoàn thiện hồ sơ gia sư</h6>
+                        <p class="small text-muted mb-0">
+                            Để bảo đảm quyền lợi và chất lượng giảng dạy, bạn bắt buộc phải cập nhật đầy đủ hồ sơ năng lực và được Ban Quản Trị phê duyệt trước khi ứng tuyển nhận lớp.
+                        </p>
+                    </div>
+
+                    <div class="bg-light p-3 rounded-3 border mb-3 small">
+                        <div class="fw-bold mb-2 text-dark"><i class="bi bi-card-checklist text-primary me-1"></i> Các mục thông tin cần hoàn thiện:</div>
+                        <ul class="list-unstyled mb-0 d-flex flex-column gap-1.5 text-secondary">
+                            <li class="d-flex align-items-center gap-2">
+                                {% if user.profile.full_name %}<i class="bi bi-check-circle-fill text-success"></i>{% else %}<i class="bi bi-circle text-muted"></i>{% endif %}
+                                <span>Họ tên đầy đủ và số điện thoại</span>
+                            </li>
+                            <li class="d-flex align-items-center gap-2">
+                                {% if user.tutor_profile.subjects.exists %}<i class="bi bi-check-circle-fill text-success"></i>{% else %}<i class="bi bi-circle text-muted"></i>{% endif %}
+                                <span>Môn học sẽ dạy (tối đa 3 môn)</span>
+                            </li>
+                            <li class="d-flex align-items-center gap-2">
+                                {% if user.tutor_profile.university or user.tutor_profile.education %}<i class="bi bi-check-circle-fill text-success"></i>{% else %}<i class="bi bi-circle text-muted"></i>{% endif %}
+                                <span>Trường Đại học / Trình độ học vấn</span>
+                            </li>
+                            <li class="d-flex align-items-center gap-2">
+                                {% if user.tutor_profile.location or user.tutor_profile.detailed_address %}<i class="bi bi-check-circle-fill text-success"></i>{% else %}<i class="bi bi-circle text-muted"></i>{% endif %}
+                                <span>Khu vực / Địa chỉ nhận dạy</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-info py-2 px-3 small border-0 bg-info-subtle text-info-emphasis rounded-2 mb-0">
+                        <i class="bi bi-info-circle-fill me-1"></i> Sau khi điền đầy đủ và lưu hồ sơ, Ban Quản Trị sẽ duyệt hồ sơ để bạn có thể nhận lớp.
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Đóng</button>
+                    <a href="{% url 'tutors:edit_tutor_profile' %}" class="btn btn-primary fw-bold px-4 shadow-sm">
+                        <i class="bi bi-pencil-square me-1"></i> Chuyển qua Cập Nhật Hồ Sơ Gia Sư <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Modal: Đang chờ Admin duyệt -->
+    {% elif user.tutor_profile.approval_status == 'pending' %}
+    <div class="modal fade" id="pendingApprovalModal" tabindex="-1" aria-labelledby="pendingApprovalModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-info-subtle border-bottom border-info-subtle">
+                    <h5 class="modal-title fw-bold text-info-emphasis d-flex align-items-center gap-2" id="pendingApprovalModalLabel">
+                        <i class="bi bi-hourglass-split fs-4"></i> Hồ Sơ Đang Chờ Admin Phê Duyệt
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-info-subtle text-info rounded-circle mb-3" style="width: 68px; height: 68px;">
+                        <i class="bi bi-clock-history fs-1 text-primary"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-2">Hồ sơ của bạn đang được xét duyệt!</h5>
+                    <p class="text-secondary small mb-3" style="line-height: 1.6;">
+                        Bạn đã cập nhật hồ sơ gia sư đầy đủ. Hồ sơ đang được Ban Quản Trị (Admin) kiểm duyệt thông tin và bằng cấp. Sau khi Admin phê duyệt thành công, bạn sẽ được mở quyền ứng tuyển nhận lớp ngay!
+                    </p>
+                    <div class="p-2.5 bg-light rounded-2 border small text-muted text-start">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-shield-check text-warning fs-5"></i>
+                            <span>Trạng thái: <strong class="text-warning">Đang chờ Admin duyệt (Pending)</strong></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Đóng</button>
+                    <a href="{% url 'tutors:edit_tutor_profile' %}" class="btn btn-outline-primary fw-bold">
+                        <i class="bi bi-eye me-1"></i> Xem lại hồ sơ của bạn
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Modal: Bị từ chối -->
+    {% elif user.tutor_profile.approval_status == 'rejected' %}
+    <div class="modal fade" id="rejectedApprovalModal" tabindex="-1" aria-labelledby="rejectedApprovalModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger-subtle border-bottom border-danger-subtle">
+                    <h5 class="modal-title fw-bold text-danger d-flex align-items-center gap-2" id="rejectedApprovalModalLabel">
+                        <i class="bi bi-x-circle-fill fs-4"></i> Hồ Sơ Chưa Được Phê Duyệt
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-secondary small mb-2">Hồ sơ gia sư của bạn chưa được Ban Quản Trị chấp thuận để tham gia nhận lớp.</p>
+                    {% if user.tutor_profile.admin_feedback %}
+                        <div class="alert alert-warning py-2 px-3 small border-0 rounded-2 mb-3">
+                            <strong>Lý do / Phản hồi từ Admin:</strong> {{ user.tutor_profile.admin_feedback }}
+                        </div>
+                    {% endif %}
+                    <p class="small text-muted mb-0">Vui lòng kiểm tra và cập nhật lại thông tin hồ sơ theo yêu cầu.</p>
+                </div>
+                <div class="modal-footer bg-light border-top-0 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Đóng</button>
+                    <a href="{% url 'tutors:edit_tutor_profile' %}" class="btn btn-danger fw-bold">
+                        <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa lại hồ sơ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Modal: Ứng tuyển chính thức khi Admin đã duyệt thành công -->
+    {% elif user.tutor_profile.approval_status == 'approved' %}
+    <div class="modal fade" id="applyModal" tabindex="-1" aria-labelledby="applyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-secondary text-white">
+                    <h5 class="modal-title fw-bold" id="applyModalLabel"><i class="bi bi-send-fill me-2"></i> Ứng Tuyển Nhận Lớp</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="{% url 'applications:apply_class' class_request.id %}">
+                    {% csrf_token %}
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Học phí bạn đề xuất (VNĐ) <small class="text-muted fw-normal">(Không bắt buộc)</small></label>
+                            <input type="number" name="proposed_price" class="form-control" placeholder="{{ class_request.budget }}" step="10000">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Lời nhắn gửi tới phụ huynh / học sinh <span class="text-danger">*</span></label>
+                            <textarea name="message" class="form-control" rows="4" placeholder="Giới thiệu kinh nghiệm dạy môn này, thành tích, phương pháp giảng dạy và thời gian rảnh của bạn..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-secondary fw-bold">
+                            <i class="bi bi-send-fill"></i> Xác Nhận Ứng Tuyển
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+{% endif %}
+{% endblock %}

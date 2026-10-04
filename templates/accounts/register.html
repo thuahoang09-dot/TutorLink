@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Đăng ký tài khoản – TutorLink{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card card-custom p-4 p-md-5 border-0 shadow">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold">Tạo Tài Khoản Mới</h3>
+                    <p class="text-muted small">Trở thành thành viên của cộng đồng TutorLink</p>
+                </div>
+
+                <form method="post" action="{% url 'accounts:register' %}">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label class="form-label d-block text-center fw-bold text-dark">Bạn muốn tham gia với vai trò gì?</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="role" id="role_student" value="student" {% if form.role.value != 'tutor' %}checked{% endif %}>
+                                <label class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center gap-1" for="role_student">
+                                    <i class="bi bi-backpack4 fs-3"></i>
+                                    <span class="fw-bold">Học sinh / Phụ huynh</span>
+                                    <small class="text-muted" style="font-size: 0.75rem;">Tìm gia sư & đăng tin</small>
+                                </label>
+                            </div>
+                            <div class="col-6">
+                                <input type="radio" class="btn-check" name="role" id="role_tutor" value="tutor" {% if form.role.value == 'tutor' %}checked{% endif %}>
+                                <label class="btn btn-outline-secondary w-100 py-3 d-flex flex-column align-items-center gap-1" for="role_tutor">
+                                    <i class="bi bi-person-video3 fs-3"></i>
+                                    <span class="fw-bold">Gia sư</span>
+                                    <small class="text-muted" style="font-size: 0.75rem;">Tìm lớp & dạy học</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label" for="id_full_name">Họ và tên <small class="text-muted fw-normal">(Không bắt buộc, có thể cập nhật sau)</small></label>
+                            {{ form.full_name }}
+                            {% if form.full_name.errors %}<div class="text-danger small mt-1">{{ form.full_name.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="id_username">Tên đăng nhập <span class="text-danger">*</span></label>
+                            {{ form.username }}
+                            {% if form.username.errors %}<div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="id_phone">Số điện thoại</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}<div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label" for="id_email">Email liên hệ <span class="text-danger">*</span></label>
+                            {{ form.email }}
+                            {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="id_password">Mật khẩu <span class="text-danger">*</span></label>
+                            {{ form.password }}
+                            {% if form.password.errors %}<div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="id_confirm_password">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                            {{ form.confirm_password }}
+                            {% if form.confirm_password.errors %}<div class="text-danger small mt-1">{{ form.confirm_password.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold">
+                            <i class="bi bi-check-circle"></i> Hoàn Tất Đăng Ký
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4 pt-3 border-top">
+                    <p class="text-muted small mb-0">
+                        Đã có tài khoản? 
+                        <a href="{% url 'accounts:login' %}" class="text-primary fw-bold text-decoration-none">Đăng nhập</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

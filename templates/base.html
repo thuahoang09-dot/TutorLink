@@ -1,0 +1,683 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TutorLink – Kết Nối Học Sinh Và Gia Sư Uy Tín{% endblock %}</title>
+    <meta name="description" content="Nền tảng kết nối học sinh và gia sư hàng đầu, tìm kiếm gia sư giỏi môn Toán, Lý, Hóa, Văn, Tiếng Anh nhanh chóng, an toàn.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}?v={% now 'U' %}">
+    <link rel="icon" type="image/png" sizes="64x64" href="{% static 'images/favicon.png' %}?v={% now 'U' %}">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}?v={% now 'U' %}">
+    
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5.3 CSS & Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v={% now 'U' %}">
+    {% block extra_css %}{% endblock %}
+
+    <!-- Early theme & language init & control script -->
+    <script>
+        // Early Theme & Language Init (Prevents flicker)
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('tutorlink_theme') || 'light';
+                document.documentElement.setAttribute('data-bs-theme', savedTheme);
+                const savedLang = localStorage.getItem('tutorlink_lang') || 'vi';
+                document.documentElement.setAttribute('lang', savedLang);
+                document.documentElement.setAttribute('data-lang', savedLang);
+            } catch(e) {}
+        })();
+
+        window.setThemeMode = function(theme) {
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            try {
+                localStorage.setItem('tutorlink_theme', theme);
+            } catch(e) {}
+            window.syncThemeUI(theme);
+        };
+
+        window.toggleThemeMode = function() {
+            const current = document.documentElement.getAttribute('data-bs-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            window.setThemeMode(next);
+        };
+
+        window.syncThemeUI = function(theme) {
+            const currentTheme = theme || document.documentElement.getAttribute('data-bs-theme') || 'light';
+            const lights = document.querySelectorAll('#btn-theme-light, .guest-btn-theme-light');
+            const darks = document.querySelectorAll('#btn-theme-dark, .guest-btn-theme-dark');
+            lights.forEach(el => {
+                if (currentTheme === 'dark') el.classList.remove('active');
+                else el.classList.add('active');
+            });
+            darks.forEach(el => {
+                if (currentTheme === 'dark') el.classList.add('active');
+                else el.classList.remove('active');
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            window.syncThemeUI();
+        });
+    </script>
+    <!-- Dedicated TutorLink Bilingual i18n Engine -->
+    <script src="{% static 'js/i18n.js' %}?v={% now 'U' %}"></script>
+</head>
+<body>
+
+    <!-- Header / Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-tutorlink">
+        <div class="container-fluid px-lg-4 px-xl-5">
+            <a class="navbar-brand-custom me-2 me-xl-3" href="{% url 'home' %}">
+                <div class="brand-badge">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <span class="brand-text">Tutor<span class="brand-accent">Link</span></span>
+            </a>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <!-- Primary Navigation Capsule -->
+                <div class="nav-capsule-wrapper me-auto mb-2 mb-lg-0">
+                    <div class="nav-capsule">
+                        <!-- Home (Icon only) -->
+                        <a class="nav-capsule-item nav-capsule-home {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}" title="Trang chủ" data-i18n-title="nav_home" aria-label="Trang chủ">
+                            <i class="bi bi-house-door-fill"></i>
+                        </a>
+                        <a class="nav-capsule-item {% if 'tutors' in request.path and not 'admin' in request.path and not 'tutor/profile' in request.path %}active{% endif %}" href="{% url 'tutors:tutor_list' %}">
+                            <i class="bi bi-people-fill"></i> <span data-i18n="nav_find_tutor">Dành cho Phụ huynh</span>
+                        </a>
+                        <a class="nav-capsule-item {% if 'classes' in request.path and not 'student' in request.path and not 'tutor' in request.path and not 'admin' in request.path %}active{% endif %}" href="{% url 'class_requests:class_list' %}">
+                            <i class="bi bi-mortarboard-fill"></i> <span data-i18n="nav_classes">Dành cho Gia sư</span>
+                        </a>
+                        {% if user.is_authenticated and user_profile.is_student %}
+                            <a class="nav-capsule-item nav-capsule-highlight {% if 'classes/post' in request.path %}active{% endif %}" href="{% url 'class_requests:post_class' %}">
+                                <i class="bi bi-plus-circle-fill"></i> <span data-i18n="nav_post_class">Đăng Tìm Gia Sư</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    {% if user.is_authenticated %}
+                        <!-- Role specific menu links -->
+                        {% if user_profile.is_student %}
+                            <li class="nav-item">
+                                <a class="nav-action-pill {% if 'dashboard' in request.path %}active{% endif %}" href="{% url 'dashboard:student_dashboard' %}">
+                                    <i class="bi bi-grid-fill text-primary"></i> <span data-i18n="nav_dashboard">Bảng điều khiển</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-action-pill position-relative {% if 'my_posts' in request.path %}active{% endif %}" href="{% url 'class_requests:my_posts' %}">
+                                    <i class="bi bi-card-checklist text-primary"></i> <span data-i18n="nav_my_posts">Bài đăng của tôi</span>
+                                    {% if pending_applications_count > 0 %}
+                                        <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
+                                            {{ pending_applications_count }}
+                                        </span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                        {% elif user_profile.is_tutor %}
+                            <li class="nav-item">
+                                <a class="nav-action-pill {% if 'dashboard' in request.path %}active{% endif %}" href="{% url 'dashboard:tutor_dashboard' %}">
+                                    <i class="bi bi-speedometer2 text-primary"></i> <span data-i18n="nav_dashboard">Bảng điều khiển</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-action-pill position-relative {% if 'study_requests' in request.path %}active{% endif %}" href="{% url 'study_requests:tutor_requests' %}">
+                                    <i class="bi bi-envelope-fill text-info"></i> <span data-i18n="nav_study_requests">Yêu cầu học</span>
+                                    {% if unread_study_requests_count > 0 %}
+                                        <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
+                                            {{ unread_study_requests_count }}
+                                        </span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                        {% elif user_profile.is_admin_user %}
+                            <li class="nav-item">
+                                <a class="nav-action-pill text-danger fw-bold position-relative {% if 'dashboard/admin' in request.path %}active{% endif %}" href="{% url 'dashboard:admin_dashboard' %}">
+                                    <i class="bi bi-shield-lock-fill"></i> <span data-i18n="nav_admin">Quản Trị Viên</span>
+                                    {% if pending_tutor_approvals_count > 0 %}
+                                        <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
+                                            {{ pending_tutor_approvals_count }}
+                                        </span>
+                                    {% endif %}
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <!-- Facebook Notification Bell Dropdown -->
+                        <li class="nav-item dropdown ms-lg-1 me-1">
+                            <a class="nav-link fb-notif-bell-btn position-relative d-flex align-items-center justify-content-center p-0" href="#" id="fbNotifDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Thông báo" data-i18n-title="notif_title">
+                                <i class="bi bi-bell-fill fs-5"></i>
+                                {% if unread_notifications_count > 0 %}
+                                    <span id="fb-notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger fb-notif-badge">
+                                        {{ unread_notifications_count }}
+                                    </span>
+                                {% else %}
+                                    <span id="fb-notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger fb-notif-badge d-none">
+                                        0
+                                    </span>
+                                {% endif %}
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end p-0 mt-2 fb-notif-menu border-0 shadow-lg" style="z-index: 9999;" aria-labelledby="fbNotifDropdownBtn">
+                                <!-- Facebook Notification Header -->
+                                <div class="fb-notif-header p-3 border-bottom d-flex align-items-center justify-content-between">
+                                    <h5 class="fw-bold m-0 fs-5" data-i18n="notif_title">Thông báo</h5>
+                                    <button type="button" class="btn btn-sm btn-link text-decoration-none text-primary fw-semibold p-0" onclick="markAllNotificationsRead(event)">
+                                        <i class="bi bi-check2-all me-1"></i><span data-i18n="notif_mark_read">Đánh dấu đã đọc</span>
+                                    </button>
+                                </div>
+
+                                <!-- Filter Pills -->
+                                <div class="px-3 pt-2 pb-1 d-flex gap-2">
+                                    <button type="button" class="btn btn-sm fb-pill active px-3 py-1 rounded-pill fw-semibold" id="fb-pill-all" onclick="filterNotifs('all', event)" data-i18n="notif_all">Tất cả</button>
+                                    <button type="button" class="btn btn-sm fb-pill px-3 py-1 rounded-pill fw-semibold" id="fb-pill-unread" onclick="filterNotifs('unread', event)" data-i18n="notif_unread">Chưa đọc</button>
+                                </div>
+
+                                <!-- Notification List -->
+                                <div class="fb-notif-list-container p-2" id="fb-notif-list">
+                                    {% if recent_notifications %}
+                                        {% for notif in recent_notifications %}
+                                            <a href="{% url 'accounts:mark_notification_read' notif.id %}" class="fb-notif-item d-flex align-items-start gap-2.5 p-2.5 rounded-3 text-decoration-none mb-1 {% if not notif.is_read %}unread{% endif %}" data-read="{{ notif.is_read|yesno:'true,false' }}">
+                                                <div class="fb-notif-avatar position-relative flex-shrink-0">
+                                                    <img src="{{ notif.get_sender_avatar }}" alt="avatar" class="avatar-img rounded-circle" style="width: 44px; height: 44px; object-fit: cover;">
+                                                    <span class="position-absolute bottom-0 end-0 rounded-circle d-flex align-items-center justify-content-center {{ notif.get_badge_icon.bg }} text-white shadow-sm" style="width: 20px; height: 20px; font-size: 0.65rem; border: 2px solid #fff;">
+                                                        <i class="bi {{ notif.get_badge_icon.icon }}"></i>
+                                                    </span>
+                                                </div>
+                                                <div class="flex-grow-1 min-w-0">
+                                                    <div class="fb-notif-msg text-dark small" style="line-height: 1.35;">
+                                                        {{ notif.message }}
+                                                    </div>
+                                                    <div class="fb-notif-time small mt-1 {% if not notif.is_read %}text-primary fw-semibold{% else %}text-muted{% endif %}" style="font-size: 0.75rem;">
+                                                        {{ notif.get_time_ago }}
+                                                    </div>
+                                                </div>
+                                                {% if not notif.is_read %}
+                                                    <span class="fb-unread-dot flex-shrink-0 align-self-center"></span>
+                                                {% endif %}
+                                            </a>
+                                        {% endfor %}
+                                    {% endif %}
+                                    <div class="text-center py-4 px-3 text-muted {% if recent_notifications %}d-none{% endif %}" id="fb-notif-empty">
+                                        <i class="bi bi-bell-slash fs-1 text-secondary opacity-50 mb-2 d-block"></i>
+                                        <div class="fw-semibold" data-i18n="notif_empty_title">Không có thông báo mới</div>
+                                        <div class="small" data-i18n="notif_empty_sub">Thông báo nhận lớp hoặc nhận gia sư sẽ xuất hiện tại đây</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <!-- User Profile Dropdown with Theme & Language switchers -->
+                        <li class="nav-item dropdown ms-lg-1">
+                            <a class="user-profile-chip text-decoration-none" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="{{ user_profile.get_avatar_url }}" alt="avatar" class="user-chip-avatar">
+                                <div class="d-none d-lg-flex flex-column text-start">
+                                    <span class="user-chip-name text-truncate">{{ user_profile.full_name|default:user.username }}</span>
+                                    <span class="badge badge-role {% if user_profile.is_student %}badge-student{% elif user_profile.is_tutor %}badge-tutor{% else %}badge-admin{% endif %}" style="font-size: 0.65rem; padding: 0.12rem 0.45rem;">
+                                        {% if user_profile.is_student %}
+                                            <span data-i18n="role_student">HỌC SINH</span>
+                                        {% elif user_profile.is_tutor %}
+                                            <span data-i18n="role_tutor">GIA SƯ</span>
+                                        {% else %}
+                                            <span data-i18n="role_admin">QUẢN TRỊ VIÊN</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <i class="bi bi-chevron-down user-chip-chevron ms-1"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2 mt-2 dropdown-menu-user" style="min-width: 270px; border-radius: 14px;">
+                                <li class="px-3 py-2 border-bottom mb-1">
+                                    <div class="fw-bold text-truncate" style="max-width: 230px;">{{ user_profile.full_name|default:user.username }}</div>
+                                    <div class="text-muted small text-truncate" style="max-width: 230px;">{{ user.email|default:"Chưa có email" }}</div>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2" href="{% url 'accounts:profile' %}">
+                                        <i class="bi bi-person me-2 text-primary"></i> <span data-i18n="profile">Thông tin cá nhân</span>
+                                    </a>
+                                </li>
+                                {% if user_profile.is_tutor %}
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{% url 'tutors:edit_tutor_profile' %}">
+                                            <i class="bi bi-pencil-square me-2 text-secondary"></i> <span data-i18n="edit_tutor_profile">Cập nhật hồ sơ gia sư</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{% url 'matched_classes:tutor_classes' %}">
+                                            <i class="bi bi-mortarboard me-2 text-success"></i> <span data-i18n="my_classes">Lớp học của tôi</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{% url 'applications:my_applications' %}">
+                                            <i class="bi bi-send-check me-2 text-info"></i> <span data-i18n="my_applications">Lớp đã ứng tuyển</span>
+                                        </a>
+                                    </li>
+                                {% elif user_profile.is_student %}
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{% url 'matched_classes:student_classes' %}">
+                                            <i class="bi bi-mortarboard me-2 text-success"></i> <span data-i18n="my_classes">Lớp học của tôi</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{% url 'study_requests:student_requests' %}">
+                                            <i class="bi bi-send me-2 text-info"></i> <span data-i18n="sent_requests">Yêu cầu học đã gửi</span>
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                                <li><hr class="dropdown-divider my-2"></li>
+
+                                <!-- Settings Header inside dropdown -->
+                                <li class="px-3 pt-1 pb-1">
+                                    <div class="text-uppercase text-muted fw-bold" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                                        <i class="bi bi-gear-fill me-1"></i> <span data-i18n="settings_title">Cài đặt hệ thống</span>
+                                    </div>
+                                </li>
+
+                                <!-- Theme Mode Switcher Inside Dropdown -->
+                                <li class="px-3 py-1.5" onclick="event.stopPropagation();">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="small fw-semibold d-flex align-items-center gap-2 text-muted">
+                                            <i class="bi bi-circle-half text-primary fs-6"></i>
+                                            <span data-i18n="theme_label">Giao diện</span>
+                                        </span>
+                                        <div class="theme-switcher-segment" id="theme-switcher-group" role="group">
+                                            <button type="button" class="theme-seg-btn active" id="btn-theme-light" onclick="setThemeMode('light'); event.stopPropagation();" title="Chế độ Sáng" data-i18n-title="theme_light" aria-label="Sáng">
+                                                <i class="bi bi-sun-fill text-warning"></i>
+                                            </button>
+                                            <button type="button" class="theme-seg-btn" id="btn-theme-dark" onclick="setThemeMode('dark'); event.stopPropagation();" title="Chế độ Tối" data-i18n-title="theme_dark" aria-label="Tối">
+                                                <i class="bi bi-moon-stars-fill text-info"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <!-- Language Switcher Inside Dropdown -->
+                                <li class="px-3 py-1.5" onclick="event.stopPropagation();">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="small fw-semibold d-flex align-items-center gap-2 text-muted">
+                                            <i class="bi bi-translate text-success fs-6"></i>
+                                            <span data-i18n="lang_label">Ngôn ngữ</span>
+                                        </span>
+                                        <div class="lang-switcher-segment" id="lang-switcher-group" role="group">
+                                            <button type="button" class="lang-seg-btn active" id="btn-lang-vi" onclick="setLanguage('vi'); event.stopPropagation();" title="Tiếng Việt" data-i18n-title="lang_vi" aria-label="Tiếng Việt">
+                                                <span class="flag-circle">
+                                                    <svg width="20" height="20" viewBox="0 0 32 32">
+                                                        <rect width="32" height="32" fill="#da251d"/>
+                                                        <polygon points="16,6.5 18.9,13.5 26,13.5 20.2,18 22.3,25.5 16,21 9.7,25.5 11.8,18 6,13.5 13.1,13.5" fill="#ffff00"/>
+                                                    </svg>
+                                                </span>
+                                            </button>
+                                            <button type="button" class="lang-seg-btn" id="btn-lang-en" onclick="setLanguage('en'); event.stopPropagation();" title="English" data-i18n-title="lang_en" aria-label="English">
+                                                <span class="flag-circle">
+                                                    <svg width="20" height="20" viewBox="0 0 32 32">
+                                                        <rect width="32" height="32" fill="#012169"/>
+                                                        <path d="M0,0 L32,32 M32,0 L0,32" stroke="#fff" stroke-width="6"/>
+                                                        <path d="M0,0 L32,32 M32,0 L0,32" stroke="#c8102e" stroke-width="2"/>
+                                                        <path d="M16,0 V32 M0,16 H32" stroke="#fff" stroke-width="10"/>
+                                                        <path d="M16,0 V32 M0,16 H32" stroke="#c8102e" stroke-width="6"/>
+                                                    </svg>
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <li><hr class="dropdown-divider my-2"></li>
+                                <li>
+                                    <form method="post" action="{% url 'accounts:logout' %}" class="d-inline w-100">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item py-2 text-danger fw-semibold d-flex align-items-center">
+                                            <i class="bi bi-box-arrow-right me-2"></i> <span data-i18n="logout">Đăng xuất</span>
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <!-- Guest Mode: Settings & Auth Buttons -->
+                        <li class="nav-item dropdown me-2">
+                            <button class="nav-link guest-settings-btn d-flex align-items-center justify-content-center p-2 rounded-circle border-0" type="button" id="guestSettingsDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Cài đặt">
+                                <i class="bi bi-gear-fill text-secondary fs-6"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2 mt-2 dropdown-menu-user" style="min-width: 260px; border-radius: 14px;">
+                                <li class="px-3 pt-1 pb-1">
+                                    <div class="text-uppercase text-muted fw-bold" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                                        <i class="bi bi-gear-fill me-1"></i> <span data-i18n="settings_title">Cài đặt hệ thống</span>
+                                    </div>
+                                </li>
+                                <li class="px-3 py-1.5" onclick="event.stopPropagation();">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="small fw-semibold d-flex align-items-center gap-2 text-muted">
+                                            <i class="bi bi-circle-half text-primary fs-6"></i>
+                                            <span data-i18n="theme_label">Giao diện</span>
+                                        </span>
+                                        <div class="theme-switcher-segment" role="group">
+                                            <button type="button" class="theme-seg-btn guest-btn-theme-light" onclick="setThemeMode('light'); event.stopPropagation();" title="Chế độ Sáng" data-i18n-title="theme_light" aria-label="Sáng">
+                                                <i class="bi bi-sun-fill text-warning"></i>
+                                            </button>
+                                            <button type="button" class="theme-seg-btn guest-btn-theme-dark" onclick="setThemeMode('dark'); event.stopPropagation();" title="Chế độ Tối" data-i18n-title="theme_dark" aria-label="Tối">
+                                                <i class="bi bi-moon-stars-fill text-info"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="px-3 py-1.5" onclick="event.stopPropagation();">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="small fw-semibold d-flex align-items-center gap-2 text-muted">
+                                            <i class="bi bi-translate text-success fs-6"></i>
+                                            <span data-i18n="lang_label">Ngôn ngữ</span>
+                                        </span>
+                                        <div class="lang-switcher-segment" role="group">
+                                            <button type="button" class="lang-seg-btn guest-btn-lang-vi" onclick="setLanguage('vi'); event.stopPropagation();" title="Tiếng Việt" data-i18n-title="lang_vi" aria-label="Tiếng Việt">
+                                                <span class="flag-circle">
+                                                    <svg width="20" height="20" viewBox="0 0 32 32">
+                                                        <rect width="32" height="32" fill="#da251d"/>
+                                                        <polygon points="16,6.5 18.9,13.5 26,13.5 20.2,18 22.3,25.5 16,21 9.7,25.5 11.8,18 6,13.5 13.1,13.5" fill="#ffff00"/>
+                                                    </svg>
+                                                </span>
+                                            </button>
+                                            <button type="button" class="lang-seg-btn guest-btn-lang-en" onclick="setLanguage('en'); event.stopPropagation();" title="English" data-i18n-title="lang_en" aria-label="English">
+                                                <span class="flag-circle">
+                                                    <svg width="20" height="20" viewBox="0 0 32 32">
+                                                        <rect width="32" height="32" fill="#012169"/>
+                                                        <path d="M0,0 L32,32 M32,0 L0,32" stroke="#fff" stroke-width="6"/>
+                                                        <path d="M0,0 L32,32 M32,0 L0,32" stroke="#c8102e" stroke-width="2"/>
+                                                        <path d="M16,0 V32 M0,16 H32" stroke="#fff" stroke-width="10"/>
+                                                        <path d="M16,0 V32 M0,16 H32" stroke="#c8102e" stroke-width="6"/>
+                                                    </svg>
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item me-2">
+                            <a class="btn guest-login-btn" href="{% url 'accounts:login' %}">
+                                <i class="bi bi-box-arrow-in-right me-1"></i> <span data-i18n="login">Đăng nhập</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn guest-reg-btn" href="{% url 'accounts:register' %}">
+                                <i class="bi bi-person-plus me-1"></i> <span data-i18n="register">Đăng ký</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Global Flash Messages -->
+    <div class="container mt-3">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert">
+                    <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill text-success{% elif message.tags == 'error' %}bi-exclamation-triangle-fill text-danger{% elif message.tags == 'warning' %}bi-exclamation-circle-fill text-warning{% else %}bi-info-circle-fill text-info{% endif %} fs-5 me-2"></i>
+                    <div>{{ message }}</div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="brand-badge footer-brand-badge">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <span class="fs-4 fw-extrabold footer-brand-text">Tutor<span class="brand-accent">Link</span></span>
+                    </div>
+                    <p class="small mb-3 footer-desc" data-i18n="footer_desc">
+                        Nền tảng kết nối Học sinh, Gia sư và Quản trị viên trực tuyến hiện đại, minh bạch, chất lượng cao. Đồ án xây dựng theo chuẩn mực bài bản và trải nghiệm mượt mà.
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge rounded-pill px-2.5 py-1.5 footer-pill-1"><i class="bi bi-check2-circle me-1"></i><span data-i18n="footer_badge1">Đồ án Web 5 TV</span></span>
+                        <span class="badge rounded-pill px-2.5 py-1.5 footer-pill-2"><i class="bi bi-shield-check me-1"></i><span data-i18n="footer_badge2">Hồ sơ kiểm duyệt</span></span>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-uppercase fw-bold mb-3 small footer-heading" data-i18n="footer_for_students">Dành cho Học sinh</h6>
+                    <ul class="list-unstyled small d-flex flex-column gap-2 mb-0">
+                        <li><a href="{% url 'tutors:tutor_list' %}" class="footer-link" data-i18n="footer_find_tutor">Tìm gia sư giỏi</a></li>
+                        <li><a href="{% url 'class_requests:post_class' %}" class="footer-link" data-i18n="footer_post_request">Đăng tin tìm gia sư</a></li>
+                        <li><a href="{% url 'class_requests:class_list' %}" class="footer-link" data-i18n="footer_sample_classes">Xem lớp học mẫu</a></li>
+                        <li><a href="{% url 'accounts:register' %}?role=student" class="footer-link" data-i18n="footer_reg_student">Đăng ký học viên</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-uppercase fw-bold mb-3 small footer-heading" data-i18n="footer_for_tutors">Dành cho Gia sư</h6>
+                    <ul class="list-unstyled small d-flex flex-column gap-2 mb-0">
+                        <li><a href="{% url 'class_requests:class_list' %}" class="footer-link" data-i18n="footer_find_teaching">Tìm lớp nhận dạy</a></li>
+                        <li><a href="{% url 'accounts:register' %}?role=tutor" class="footer-link" data-i18n="footer_reg_tutor">Đăng ký làm gia sư</a></li>
+                        <li><a href="{% url 'tutors:tutor_list' %}" class="footer-link" data-i18n="footer_ranking">Bảng xếp hạng gia sư</a></li>
+                        <li><a href="{% url 'accounts:login' %}" class="footer-link" data-i18n="footer_login_acc">Đăng nhập tài khoản</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <h6 class="text-uppercase fw-bold mb-3 small footer-heading" data-i18n="footer_contact_support">Thông tin liên hệ & Hỗ trợ</h6>
+                    <ul class="list-unstyled small d-flex flex-column gap-2.5 mb-0 footer-contact-list">
+                        <li class="d-flex align-items-center"><i class="bi bi-geo-alt-fill text-danger me-2 fs-6"></i> <span data-i18n="footer_uni">Trường Đại Học - Khoa CNTT</span></li>
+                        <li class="d-flex align-items-center"><i class="bi bi-envelope-fill text-primary me-2 fs-6"></i> <span>contact@tutorlink.edu.vn</span></li>
+                        <li class="d-flex align-items-center"><i class="bi bi-telephone-fill text-success me-2 fs-6"></i> <span>1900 6868 (8h00 - 21h00)</span></li>
+                        <li class="d-flex align-items-center"><i class="bi bi-clock-fill text-warning me-2 fs-6"></i> <span data-i18n="footer_support_247">Hỗ trợ kết nối 24/7 trực tuyến</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <hr class="my-4 footer-hr">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small footer-bottom-text">
+                <div>© 2026 <strong class="footer-brand-name">TutorLink</strong>. <span data-i18n="footer_copyright">Tất cả quyền được bảo lưu.</span></div>
+                <div class="mt-2 mt-md-0 d-flex align-items-center gap-2">
+                    <span class="badge px-2.5 py-1.5 footer-badge-pill" data-i18n="footer_simple">Đơn giản</span>
+                    <span class="badge px-2.5 py-1.5 footer-badge-pill" data-i18n="footer_trusted">Uy tín</span>
+                    <span class="badge px-2.5 py-1.5 footer-badge-highlight" data-i18n="footer_demo">Dễ demo</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.VIETNAM_DISTRICTS = {{ vietnam_districts_json|safe }};
+
+        function initLocationCascade(provEl, distEl, selectedDistrict) {
+            if (!provEl || !distEl) return;
+
+            function updateDistricts() {
+                const prov = provEl.value;
+                const districts = (window.VIETNAM_DISTRICTS && window.VIETNAM_DISTRICTS[prov]) || [];
+
+                distEl.innerHTML = '<option value="">Tất cả phường / xã</option>';
+
+                if (!prov || prov === 'Online') {
+                    distEl.disabled = (prov === 'Online');
+                    return;
+                }
+
+                distEl.disabled = false;
+                districts.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d;
+                    opt.textContent = d;
+                    if (selectedDistrict && (selectedDistrict === d || selectedDistrict.toLowerCase() === d.toLowerCase())) {
+                        opt.selected = true;
+                    }
+                    distEl.appendChild(opt);
+                });
+            }
+
+            provEl.addEventListener('change', function() {
+                selectedDistrict = '';
+                updateDistricts();
+            });
+
+            updateDistricts();
+        }
+    </script>
+    <!-- Floating Virtual Assistant Widget -->
+    {% include 'includes/assistant_widget.html' %}
+
+    <script src="{% static 'js/main.js' %}?v={% now 'U' %}"></script>
+
+    <!-- Facebook Notification Logic -->
+    <script>
+        window.markAllNotificationsRead = function(e) {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            fetch("{% url 'accounts:mark_all_notifications_read' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const badge = document.getElementById('fb-notif-badge');
+                    if (badge) {
+                        badge.textContent = '0';
+                        badge.classList.add('d-none');
+                    }
+                    // Remove unread indicators
+                    document.querySelectorAll('.fb-notif-item').forEach(el => {
+                        el.classList.remove('unread');
+                        el.setAttribute('data-read', 'true');
+                        const dot = el.querySelector('.fb-unread-dot');
+                        if (dot) dot.remove();
+                        const time = el.querySelector('.fb-notif-time');
+                        if (time) {
+                            time.classList.remove('text-primary', 'fw-semibold');
+                            time.classList.add('text-muted');
+                        }
+                    });
+                }
+            })
+            .catch(() => {});
+        };
+
+        window.filterNotifs = function(filter, event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            const pillAll = document.getElementById('fb-pill-all');
+            const pillUnread = document.getElementById('fb-pill-unread');
+            const items = document.querySelectorAll('.fb-notif-item');
+            const emptyEl = document.getElementById('fb-notif-empty');
+
+            let visibleCount = 0;
+
+            if (filter === 'unread') {
+                if (pillUnread) {
+                    pillUnread.classList.add('active');
+                    pillUnread.classList.remove('text-secondary');
+                }
+                if (pillAll) {
+                    pillAll.classList.remove('active');
+                    pillAll.classList.add('text-secondary');
+                }
+
+                items.forEach(el => {
+                    const isRead = el.getAttribute('data-read') === 'true';
+                    if (isRead) {
+                        el.style.display = 'none';
+                    } else {
+                        el.style.display = 'flex';
+                        visibleCount++;
+                    }
+                });
+            } else {
+                if (pillAll) {
+                    pillAll.classList.add('active');
+                    pillAll.classList.remove('text-secondary');
+                }
+                if (pillUnread) {
+                    pillUnread.classList.remove('active');
+                    pillUnread.classList.add('text-secondary');
+                }
+
+                items.forEach(el => {
+                    el.style.display = 'flex';
+                    visibleCount++;
+                });
+            }
+
+            if (emptyEl) {
+                if (visibleCount === 0) {
+                    emptyEl.classList.remove('d-none');
+                } else {
+                    emptyEl.classList.add('d-none');
+                }
+            }
+        };
+
+        // Prevent dropdown from closing when clicking inside the notification menu
+        document.addEventListener('DOMContentLoaded', function() {
+            const notifMenu = document.querySelector('.fb-notif-menu');
+            if (notifMenu) {
+                notifMenu.addEventListener('click', function(e) {
+                    // If clicking directly on a notification link, allow normal navigation
+                    if (e.target.closest('.fb-notif-item')) {
+                        return;
+                    }
+                    e.stopPropagation();
+                });
+            }
+        });
+
+        // Real-time polling for new Facebook notifications every 20 seconds
+        {% if user.is_authenticated %}
+        setInterval(function() {
+            fetch("{% url 'accounts:get_notifications_api' %}")
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const badge = document.getElementById('fb-notif-badge');
+                    if (badge) {
+                        if (data.unread_count > 0) {
+                            badge.textContent = data.unread_count;
+                            badge.classList.remove('d-none');
+                        } else {
+                            badge.textContent = '0';
+                            badge.classList.add('d-none');
+                        }
+                    }
+                }
+            })
+            .catch(() => {});
+        }, 20000);
+        {% endif %}
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

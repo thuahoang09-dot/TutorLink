@@ -1,0 +1,61 @@
+{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}Quản lý bài đăng – TutorLink Admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h3 class="fw-bold mb-1">Quản Lý Yêu Cầu Tìm Gia Sư</h3>
+        <p class="text-muted small mb-0">Giám sát các tin đăng tìm gia sư trên toàn hệ thống</p>
+    </div>
+</div>
+
+<div class="card card-custom p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Tiêu đề bài đăng</th>
+                    <th>Học sinh đăng</th>
+                    <th>Môn & Lớp</th>
+                    <th>Ngân sách</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày đăng</th>
+                    <th class="pe-4 text-end">Chi tiết</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in posts %}
+                    <tr>
+                        <td class="ps-4">
+                            <a href="{% url 'class_requests:class_detail' p.id %}" target="_blank" class="fw-bold text-dark text-decoration-none">
+                                {{ p.title }}
+                            </a>
+                            <div class="text-muted small">{{ p.location }}</div>
+                        </td>
+                        <td>{{ p.student.profile.full_name|default:p.student.username }}</td>
+                        <td><span class="badge bg-light text-primary border">{{ p.subject.name }} ({{ p.grade }})</span></td>
+                        <td><span class="fw-bold text-danger">{{ p.budget }} đ</span></td>
+                        <td>
+                            <span class="badge badge-status {% if p.status == 'pending' %}status-pending{% elif p.status == 'accepted' or p.status == 'closed' %}status-accepted{% else %}status-rejected{% endif %}">
+                                {{ p.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="text-muted small">{{ p.created_at|date:"d/m/Y" }}</td>
+                        <td class="pe-4 text-end">
+                            <a href="{% url 'class_requests:class_detail' p.id %}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye"></i> Xem tin
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">Chưa có bài đăng nào.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

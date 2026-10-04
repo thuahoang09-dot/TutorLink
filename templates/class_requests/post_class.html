@@ -1,0 +1,716 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Chỉnh sửa bài đăng – {{ class_request.title }}{% else %}Đăng Yêu Cầu Tìm Gia Sư Mới{% endif %} – TutorLink{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ==========================================================================
+   SCHEDULE TABLE STYLING
+   ========================================================================== */
+.schedule-box {
+    border-radius: 12px;
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    padding: 1.25rem;
+}
+
+.tt-schedule-table {
+    border-collapse: separate;
+    border-spacing: 6px 6px;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.tt-schedule-table th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--bs-body-color, #333333);
+    text-align: center;
+    padding: 6px 0;
+}
+
+.tt-schedule-cell {
+    border: 1px solid #ced4da;
+    background-color: var(--bs-body-bg, #ffffff);
+    color: var(--bs-secondary-color, #6c757d);
+    border-radius: 6px;
+    padding: 8px 0;
+    font-size: 0.84rem;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+}
+
+.tt-schedule-cell:hover {
+    border-color: #fa8c16;
+    color: #fa8c16;
+    background-color: rgba(250, 140, 22, 0.08);
+    transform: translateY(-1px);
+}
+
+.tt-schedule-cell.active {
+    border-color: #fa8c16 !important;
+    background-color: #fa8c16 !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(250, 140, 22, 0.35);
+}
+
+[data-bs-theme="dark"] .tt-schedule-cell {
+    background-color: #212529;
+    border-color: #495057;
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .tt-schedule-cell:hover {
+    background-color: rgba(250, 140, 22, 0.15);
+}
+
+[data-bs-theme="dark"] .tt-schedule-cell.active {
+    border-color: #fa8c16 !important;
+    background-color: #fa8c16 !important;
+    color: #ffffff !important;
+}
+
+.preset-btn {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+}
+
+/* ==========================================================================
+   LOCATION SELECTION BOX
+   ========================================================================== */
+.location-box {
+    border-radius: 12px;
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    padding: 1.25rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card card-custom p-4 p-md-5 border-0 shadow">
+                <div class="text-center mb-4 pb-2 border-bottom">
+                    <div class="brand-badge mx-auto mb-2" style="width: 44px; height: 44px; font-size: 1.35rem; background: var(--primary); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-file-earmark-plus"></i>
+                    </div>
+                    <h3 class="fw-bold">{% if is_edit %}Chỉnh Sửa Bài Đăng Tìm Gia Sư{% else %}Đăng Yêu Cầu Tìm Gia Sư Mới{% endif %}</h3>
+                    <p class="text-muted small">Điền đầy đủ thông tin để nhận được phản hồi nhanh và chính xác nhất từ các gia sư</p>
+                </div>
+
+                <form method="post" id="postClassForm">
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <!-- Tiêu đề bài đăng -->
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold" for="id_title">Tiêu đề bài đăng <span class="text-danger">*</span></label>
+                            {{ form.title }}
+                            {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <!-- Môn học & Khối lớp -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="id_subject">Môn học cần học <span class="text-danger">*</span></label>
+                            {{ form.subject }}
+                            {% if form.subject.errors %}<div class="text-danger small mt-1">{{ form.subject.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="id_grade">Khối lớp / Trình độ <span class="text-danger">*</span></label>
+                            {{ form.grade }}
+                            {% if form.grade.errors %}<div class="text-danger small mt-1">{{ form.grade.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <!-- Mức ngân sách & Đơn vị -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="id_budget">Mức ngân sách / thù lao <span class="text-danger">*</span></label>
+                            {{ form.budget }}
+                            {% if form.budget.errors %}<div class="text-danger small mt-1">{{ form.budget.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="id_budget_type">Đơn vị ngân sách</label>
+                            {{ form.budget_type }}
+                        </div>
+
+                        <!-- Hình thức học & Số buổi / tuần -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="id_teaching_method">Hình thức học <span class="text-danger">*</span></label>
+                            {{ form.teaching_method }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="id_sessions_per_week"><i class="bi bi-calendar-check text-primary me-1"></i> Số buổi / tuần <span class="text-danger">*</span></label>
+                            {{ form.sessions_per_week }}
+                            {% if form.sessions_per_week.errors %}<div class="text-danger small mt-1">{{ form.sessions_per_week.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <!-- ==========================================================
+                             ĐỊA ĐIỂM HỌC (TỰ ĐỘNG CHỌN TỈNH/THÀNH, PHƯỜNG/XÃ, ĐỊA CHỈ CỤ THỂ)
+                             ========================================================== -->
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold mb-2">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i> Địa điểm học <span class="text-danger">*</span>
+                            </label>
+                            <div class="location-box">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-medium mb-1" for="post_province">Tỉnh / Thành phố <span class="text-danger">*</span></label>
+                                        <select id="post_province" name="post_province" class="form-select">
+                                            <option value="">-- Chọn Tỉnh / Thành phố --</option>
+                                            <option value="Online">🌐 Học Online (Toàn quốc)</option>
+                                            <optgroup label="Thành phố lớn">
+                                                {% for city in popular_cities %}
+                                                    <option value="{{ city }}">{{ city }}</option>
+                                                {% endfor %}
+                                            </optgroup>
+                                            <optgroup label="Tất cả tỉnh thành">
+                                                {% for prov in vietnam_provinces %}
+                                                    {% if prov not in popular_cities %}
+                                                        <option value="{{ prov }}">{{ prov }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </optgroup>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-medium mb-1" for="post_district">Phường / Xã / Quận <span class="text-danger">*</span></label>
+                                        <select id="post_district" name="post_district" class="form-select">
+                                            <option value="">-- Chọn Phường / Xã --</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-medium mb-1" for="post_specific_address">Địa chỉ học cụ thể</label>
+                                        <input type="text" id="post_specific_address" name="post_specific_address" class="form-control" placeholder="Số nhà, ngõ/tòa nhà, đường...">
+                                    </div>
+                                </div>
+
+                                <!-- Input ẩn đồng bộ dữ liệu chuẩn vào form backend -->
+                                {{ form.location }}
+
+                                <!-- Thanh trạng thái hiển thị địa chỉ -->
+                                <div class="mt-3 pt-2 border-top d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                    <div class="small">
+                                        <span class="text-muted"><i class="bi bi-geo-fill text-primary me-1"></i>Địa chỉ đầy đủ:</span>
+                                        <span id="preview_location" class="fw-semibold text-primary ms-1">{{ form.location.value|default:'Chưa xác định' }}</span>
+                                    </div>
+                                    {% if request.user.profile.address %}
+                                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2.5" id="btn_use_profile_address" data-address="{{ request.user.profile.address }}" title="Điền nhanh từ địa chỉ tài khoản của bạn">
+                                        <i class="bi bi-person-check me-1"></i>Dùng địa chỉ hồ sơ ({{ request.user.profile.address }})
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                {% if form.location.errors %}<div class="text-danger small mt-1">{{ form.location.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <!-- ==========================================================
+                             THỜI GIAN CÓ THỂ HỌC (CHỌN TRỰC TIẾP TRÊN BẢNG MA TRẬN TUẦN)
+                             ========================================================== -->
+                        <div class="col-md-12">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
+                                <label class="form-label fw-semibold mb-0" for="id_schedule">
+                                    <i class="bi bi-calendar3-week text-primary me-1"></i> Thời gian có thể học <span class="text-danger">*</span>
+                                    <span class="fw-normal text-muted small ms-1">( <span class="fw-bold" style="color: #fa8c16;">Màu CAM</span> hiển thị những buổi có thể học )</span>
+                                </label>
+                                <!-- Phím tắt chọn nhanh -->
+                                <div class="d-flex flex-wrap gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="applyPresetSchedule('toi_246')">⚡ Tối 2, 4, 6</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="applyPresetSchedule('toi_357')">⚡ Tối 3, 5, 7</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="applyPresetSchedule('cuoi_tuan')">⚡ Cuối tuần (T7, CN)</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="applyPresetSchedule('tat_ca_toi')">⚡ Tất cả các tối</button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger preset-btn" onclick="clearSchedule()">🔄 Xóa chọn</button>
+                                </div>
+                            </div>
+
+                            <!-- Ma trận 2 bảng: Thứ 2-Thứ 6 (col-lg-8) và Thứ 7-Chủ nhật (col-lg-4) -->
+                            <div class="schedule-box">
+                                <div class="row g-3">
+                                    <!-- Bảng 1: Thứ 2 đến Thứ 6 (5 cột) -->
+                                    <div class="col-lg-8">
+                                        <div class="text-center small fw-semibold text-muted mb-1">Các ngày trong tuần (Thứ 2 - Thứ 6)</div>
+                                        <div class="table-responsive">
+                                            <table class="table table-borderless text-center align-middle tt-schedule-table mb-0" style="table-layout: fixed;">
+                                                <thead>
+                                                    <tr>
+                                                        {% for day_key, day_name in timetable.weekdays %}
+                                                            <th style="width: 20%;">{{ day_name }}</th>
+                                                        {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="interactive-schedule-grid">
+                                                    {% for row in timetable.weekday_rows %}
+                                                        <tr>
+                                                            {% for slot in row.slots %}
+                                                                <td class="p-1">
+                                                                    <div class="tt-schedule-cell {% if slot.is_active %}active{% endif %}" 
+                                                                         data-day="{{ slot.day_key }}" 
+                                                                         data-day-name="{{ slot.day_name }}"
+                                                                         data-period="{{ slot.period_key }}" 
+                                                                         data-period-name="{{ slot.period_name }}"
+                                                                         onclick="toggleScheduleCell(this)">
+                                                                        {{ slot.period_name }}
+                                                                    </div>
+                                                                </td>
+                                                            {% endfor %}
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bảng 2: Thứ 7 & Chủ nhật (2 cột) -->
+                                    <div class="col-lg-4">
+                                        <div class="text-center small fw-semibold text-muted mb-1">Cuối tuần</div>
+                                        <div class="table-responsive">
+                                            <table class="table table-borderless text-center align-middle tt-schedule-table mb-0" style="table-layout: fixed;">
+                                                <thead>
+                                                    <tr>
+                                                        {% for day_key, day_name in timetable.weekend %}
+                                                            <th style="width: 50%;">{{ day_name }}</th>
+                                                        {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="interactive-schedule-grid">
+                                                    {% for row in timetable.weekend_rows %}
+                                                        <tr>
+                                                            {% for slot in row.slots %}
+                                                                <td class="p-1">
+                                                                    <div class="tt-schedule-cell {% if slot.is_active %}active{% endif %}" 
+                                                                         data-day="{{ slot.day_key }}" 
+                                                                         data-day-name="{{ slot.day_name }}"
+                                                                         data-period="{{ slot.period_key }}" 
+                                                                         data-period-name="{{ slot.period_name }}"
+                                                                         onclick="toggleScheduleCell(this)">
+                                                                        {{ slot.period_name }}
+                                                                    </div>
+                                                                </td>
+                                                            {% endfor %}
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Thanh trạng thái đã chọn và Ô nhập / tinh chỉnh chi tiết -->
+                                <div class="mt-3 pt-3 border-top">
+                                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                                        <div id="schedule_summary_badge" class="badge bg-secondary-subtle text-secondary border px-3 py-2 fw-semibold">
+                                            <i class="bi bi-clock me-1"></i> <span id="schedule_summary_text">Chưa chọn buổi nào</span>
+                                        </div>
+                                        <span class="small text-muted"><i class="bi bi-pencil-square me-1"></i>Bạn có thể tinh chỉnh thêm giờ học cụ thể nếu muốn:</span>
+                                    </div>
+                                    {{ form.schedule }}
+                                    <div class="form-text small text-muted">
+                                        <i class="bi bi-info-circle me-1 text-primary"></i> Thời gian có thể học sẽ tự động được tạo khi bạn bấm chọn các buổi trên bảng (VD: Tối T2, T4, T6).
+                                    </div>
+                                    {% if form.schedule.errors %}<div class="text-danger small mt-1">{{ form.schedule.errors.0 }}</div>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mô tả chi tiết yêu cầu & Tình hình học lực -->
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold" for="id_description">Mô tả chi tiết yêu cầu & Tình hình học lực <span class="text-danger">*</span></label>
+                            {{ form.description }}
+                            {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top d-flex justify-content-between">
+                        <a href="{% if is_edit %}{% url 'class_requests:class_detail' class_request.id %}{% else %}{% url 'class_requests:class_list' %}{% endif %}" class="btn btn-outline-secondary">
+                            Hủy bỏ
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold">
+                            <i class="bi bi-check2-circle"></i> {% if is_edit %}Lưu Chỉnh Sửa{% else %}Đăng Yêu Cầu Ngay{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initClassLocation();
+    initClassSchedule();
+});
+
+/* ==========================================================================
+   1. ĐỊA ĐIỂM HỌC: CASCADE CHỌN TỈNH/THÀNH, PHƯỜNG/XÃ VÀ ĐỒNG BỘ ĐỊA CHỈ
+   ========================================================================== */
+function initClassLocation() {
+    const provEl = document.getElementById('post_province');
+    const distEl = document.getElementById('post_district');
+    const specEl = document.getElementById('post_specific_address');
+    const hiddenLocEl = document.getElementById('id_location');
+    const previewEl = document.getElementById('preview_location');
+    const methodEl = document.getElementById('id_teaching_method');
+    const btnUseProfile = document.getElementById('btn_use_profile_address');
+
+    if (!provEl || !distEl || !hiddenLocEl) return;
+
+    function populateDistricts(selectedDist = '') {
+        const prov = provEl.value;
+        distEl.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+
+        if (!prov || prov === 'Online') {
+            distEl.disabled = (prov === 'Online');
+            if (prov === 'Online') {
+                distEl.innerHTML = '<option value="">-- Không áp dụng khi học Online --</option>';
+                if (specEl) {
+                    specEl.disabled = true;
+                    specEl.placeholder = 'Học trực tuyến qua Zoom / Google Meet';
+                }
+            } else {
+                if (specEl) {
+                    specEl.disabled = false;
+                    specEl.placeholder = 'Số nhà, ngõ/tòa nhà, đường...';
+                }
+            }
+            return;
+        }
+
+        distEl.disabled = false;
+        if (specEl) {
+            specEl.disabled = false;
+            specEl.placeholder = 'Số nhà, ngõ/tòa nhà, đường...';
+        }
+
+        const districts = (window.VIETNAM_DISTRICTS && window.VIETNAM_DISTRICTS[prov]) || [];
+        districts.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d;
+            opt.textContent = d;
+            if (selectedDist && (selectedDist === d || selectedDist.toLowerCase() === d.toLowerCase())) {
+                opt.selected = true;
+            }
+            distEl.appendChild(opt);
+        });
+    }
+
+    function syncLocation() {
+        const prov = provEl.value;
+        const dist = distEl.value;
+        const spec = specEl ? specEl.value.trim() : '';
+
+        let combined = '';
+        if (prov === 'Online') {
+            combined = 'Học Online';
+        } else {
+            const parts = [];
+            if (spec) parts.push(spec);
+            if (dist) parts.push(dist);
+            if (prov) parts.push(prov);
+            combined = parts.join(', ');
+        }
+
+        hiddenLocEl.value = combined;
+        if (previewEl) {
+            previewEl.textContent = combined || 'Chưa xác định';
+        }
+    }
+
+    provEl.addEventListener('change', function() {
+        populateDistricts();
+        syncLocation();
+        if (provEl.value === 'Online' && methodEl && methodEl.value !== 'online') {
+            methodEl.value = 'online';
+        }
+    });
+
+    distEl.addEventListener('change', syncLocation);
+    if (specEl) {
+        specEl.addEventListener('input', syncLocation);
+    }
+
+    if (methodEl) {
+        methodEl.addEventListener('change', function() {
+            if (methodEl.value === 'online' && !provEl.value) {
+                provEl.value = 'Online';
+                populateDistricts();
+                syncLocation();
+            }
+        });
+    }
+
+    // Tự động phân tích địa chỉ có sẵn (khi sửa bài đăng hoặc từ hồ sơ)
+    function parseAndApplyLocation(locStr) {
+        if (!locStr) return;
+        locStr = locStr.trim();
+        if (locStr.toLowerCase().includes('online')) {
+            provEl.value = 'Online';
+            populateDistricts();
+            syncLocation();
+            return;
+        }
+
+        let foundProv = '';
+        const provOptions = Array.from(provEl.options).map(o => o.value).filter(v => v && v !== 'Online');
+        // Tìm tỉnh khớp (ưu tiên chuỗi dài trước)
+        provOptions.sort((a, b) => b.length - a.length);
+        for (const p of provOptions) {
+            if (locStr.toLowerCase().includes(p.toLowerCase())) {
+                foundProv = p;
+                break;
+            }
+        }
+
+        if (foundProv) {
+            provEl.value = foundProv;
+            populateDistricts();
+
+            let foundDist = '';
+            const distList = (window.VIETNAM_DISTRICTS && window.VIETNAM_DISTRICTS[foundProv]) || [];
+            distList.sort((a, b) => b.length - a.length);
+            for (const d of distList) {
+                if (locStr.toLowerCase().includes(d.toLowerCase())) {
+                    foundDist = d;
+                    break;
+                }
+            }
+
+            if (foundDist) {
+                distEl.value = foundDist;
+            }
+
+            // Tách phần địa chỉ cụ thể còn lại
+            let remaining = locStr;
+            if (foundProv) {
+                const regexP = new RegExp(foundProv.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+                remaining = remaining.replace(regexP, '');
+            }
+            if (foundDist) {
+                const regexD = new RegExp(foundDist.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+                remaining = remaining.replace(regexD, '');
+            }
+            remaining = remaining.replace(/,\s*,/g, ',').replace(/^[\s,]+|[\s,]+$/g, '').trim();
+
+            if (specEl && remaining) {
+                specEl.value = remaining;
+            }
+            syncLocation();
+        } else {
+            // Mặc định tỉnh Hà Nội nếu không nhận diện được
+            provEl.value = 'Hà Nội';
+            populateDistricts();
+            if (specEl) specEl.value = locStr;
+            syncLocation();
+        }
+    }
+
+    if (btnUseProfile) {
+        btnUseProfile.addEventListener('click', function() {
+            const addr = this.getAttribute('data-address');
+            if (addr) {
+                parseAndApplyLocation(addr);
+            }
+        });
+    }
+
+    // Khởi tạo ban đầu
+    const initialLocation = hiddenLocEl.value || '';
+    if (initialLocation) {
+        parseAndApplyLocation(initialLocation);
+    } else {
+        // Mặc định chọn Hà Nội để danh sách phường xã có sẵn ngay lập tức
+        provEl.value = 'Hà Nội';
+        populateDistricts();
+        syncLocation();
+    }
+}
+
+/* ==========================================================================
+   2. LỊCH HỌC DỰ KIẾN: CHỌN THEO MA TRẬN 2 BẢNG & ĐỒNG BỘ INPUT
+   ========================================================================== */
+const DAY_ORDER = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+const DAY_LABELS = {
+    'mon': 'Thứ 2',
+    'tue': 'Thứ 3',
+    'wed': 'Thứ 4',
+    'thu': 'Thứ 5',
+    'fri': 'Thứ 6',
+    'sat': 'Thứ 7',
+    'sun': 'Chủ nhật'
+};
+const DAY_SHORT = {
+    'mon': 'T2',
+    'tue': 'T3',
+    'wed': 'T4',
+    'thu': 'T5',
+    'fri': 'T6',
+    'sat': 'T7',
+    'sun': 'CN'
+};
+const PERIOD_ORDER = ['sang', 'chieu', 'toi'];
+const PERIOD_LABELS = {
+    'sang': 'Sáng',
+    'chieu': 'Chiều',
+    'toi': 'Tối'
+};
+
+function toggleScheduleCell(cell) {
+    cell.classList.toggle('active');
+    updateScheduleFromMatrix();
+}
+
+function updateScheduleFromMatrix() {
+    const activeCells = document.querySelectorAll('.interactive-schedule-grid .tt-schedule-cell.active');
+    const scheduleInput = document.getElementById('id_schedule');
+    const summaryBadge = document.getElementById('schedule_summary_badge');
+    const summaryText = document.getElementById('schedule_summary_text');
+
+    if (activeCells.length === 0) {
+        if (summaryText) summaryText.textContent = 'Chưa chọn buổi nào';
+        if (summaryBadge) {
+            summaryBadge.className = 'badge bg-secondary-subtle text-secondary border px-3 py-2 fw-semibold';
+        }
+        if (scheduleInput) scheduleInput.value = '';
+        return;
+    }
+
+    const slots = [];
+    activeCells.forEach(cell => {
+        const day = cell.getAttribute('data-day');
+        const period = cell.getAttribute('data-period');
+        const dayName = cell.getAttribute('data-day-name') || DAY_LABELS[day] || day;
+        const periodName = cell.getAttribute('data-period-name') || PERIOD_LABELS[period] || period;
+        slots.push({
+            day,
+            period,
+            dayName,
+            periodName,
+            dayIndex: DAY_ORDER.indexOf(day),
+            periodIndex: PERIOD_ORDER.indexOf(period)
+        });
+    });
+
+    // Sắp xếp thứ tự theo thứ trong tuần và buổi trong ngày
+    slots.sort((a, b) => {
+        if (a.dayIndex !== b.dayIndex) return a.dayIndex - b.dayIndex;
+        return a.periodIndex - b.periodIndex;
+    });
+
+    const count = slots.length;
+    const allPeriods = new Set(slots.map(s => s.periodName));
+    let details = '';
+
+    if (allPeriods.size === 1) {
+        const pName = Array.from(allPeriods)[0];
+        const daysStr = slots.map(s => DAY_SHORT[s.day] || s.dayName).join(', ');
+        details = `${pName} ${daysStr}`;
+    } else {
+        details = slots.map(s => `${s.periodName} ${DAY_SHORT[s.day] || s.dayName}`).join(', ');
+    }
+
+    const formatted = `${count} buổi/tuần (${details})`;
+
+    if (summaryText) summaryText.textContent = `Đã chọn: ${formatted}`;
+    if (summaryBadge) {
+        summaryBadge.className = 'badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2 fw-semibold';
+    }
+
+    if (scheduleInput) {
+        const currentVal = scheduleInput.value.trim();
+        // Giữ lại giờ cụ thể nếu người dùng đã gõ thêm (VD: từ 19h30 - 21h30)
+        const matchExtra = currentVal.match(/(từ\s+\d+h.*|lúc\s+\d+h.*|\(\d+h.*\))/i);
+        if (matchExtra && !formatted.includes(matchExtra[0])) {
+            scheduleInput.value = `${formatted} ${matchExtra[0]}`;
+        } else {
+            scheduleInput.value = formatted;
+        }
+    }
+}
+
+function clearSchedule() {
+    document.querySelectorAll('.interactive-schedule-grid .tt-schedule-cell.active').forEach(c => {
+        c.classList.remove('active');
+    });
+    updateScheduleFromMatrix();
+}
+
+function applyPresetSchedule(preset) {
+    clearSchedule();
+    const cells = document.querySelectorAll('.interactive-schedule-grid .tt-schedule-cell');
+
+    cells.forEach(cell => {
+        const day = cell.getAttribute('data-day');
+        const period = cell.getAttribute('data-period');
+
+        if (preset === 'toi_246') {
+            if (['mon', 'wed', 'fri'].includes(day) && period === 'toi') cell.classList.add('active');
+        } else if (preset === 'toi_357') {
+            if (['tue', 'thu', 'sat'].includes(day) && period === 'toi') cell.classList.add('active');
+        } else if (preset === 'cuoi_tuan') {
+            if (['sat', 'sun'].includes(day) && (period === 'sang' || period === 'chieu')) cell.classList.add('active');
+        } else if (preset === 'tat_ca_toi') {
+            if (period === 'toi') cell.classList.add('active');
+        }
+    });
+
+    updateScheduleFromMatrix();
+}
+
+function initClassSchedule() {
+    const scheduleInput = document.getElementById('id_schedule');
+    if (!scheduleInput) return;
+
+    // Khi người dùng tự nhập tay vào input, nếu xóa trắng thì cũng xóa chọn trên bảng
+    scheduleInput.addEventListener('input', function() {
+        if (!scheduleInput.value.trim()) {
+            document.querySelectorAll('.interactive-schedule-grid .tt-schedule-cell.active').forEach(c => {
+                c.classList.remove('active');
+            });
+            const summaryText = document.getElementById('schedule_summary_text');
+            const summaryBadge = document.getElementById('schedule_summary_badge');
+            if (summaryText) summaryText.textContent = 'Chưa chọn buổi nào';
+            if (summaryBadge) summaryBadge.className = 'badge bg-secondary-subtle text-secondary border px-3 py-2 fw-semibold';
+        }
+    });
+
+    // Nếu đã có sẵn giá trị (khi sửa bài đăng) thì kích hoạt các ô khớp
+    if (scheduleInput.value.trim()) {
+        const val = scheduleInput.value.toLowerCase();
+        const cells = document.querySelectorAll('.interactive-schedule-grid .tt-schedule-cell');
+
+        let anyActive = false;
+        cells.forEach(cell => {
+            const day = cell.getAttribute('data-day');
+            const period = cell.getAttribute('data-period');
+            const shortDay = (DAY_SHORT[day] || '').toLowerCase();
+            const fullDay = (DAY_LABELS[day] || '').toLowerCase();
+            const pName = (PERIOD_LABELS[period] || '').toLowerCase();
+
+            const dayMatched = val.includes(shortDay) || val.includes(fullDay);
+            const periodMatched = val.includes(pName);
+
+            if (dayMatched && periodMatched) {
+                cell.classList.add('active');
+                anyActive = true;
+            }
+        });
+
+        if (anyActive) {
+            updateScheduleFromMatrix();
+        }
+    }
+}
+</script>
+{% endblock %}

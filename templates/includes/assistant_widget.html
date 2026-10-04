@@ -1,0 +1,852 @@
+{% load static %}
+<!-- Chat Window Popup (Cửa sổ hỗ trợ AI - Độc lập, cố định ở góc dưới phải, không bao giờ bị khuyết trên đỉnh) -->
+<div id="assistant-modal" class="assistant-modal shadow-lg" role="dialog" aria-labelledby="assistant-header-title">
+    <!-- Header -->
+    <div class="assistant-header">
+        <div class="d-flex align-items-center gap-2.5">
+            <div class="assistant-avatar-wrap position-relative">
+                <div class="assistant-avatar">
+                    <svg viewBox="0 0 100 100" width="36" height="36">
+                        <!-- Graduation Cap in Royal Blue -->
+                        <polygon points="50,14 16,28 50,38 84,28" fill="#1E3A8A" />
+                        <polygon points="50,14 84,28 78,31 50,18" fill="#3B82F6" opacity="0.8" />
+                        <rect x="40" y="34" width="20" height="9" rx="4" fill="#1E3A8A" />
+                        <line x1="76" y1="29" x2="80" y2="44" stroke="#F59E0B" stroke-width="2.5" />
+                        <circle cx="80" cy="45" r="2.5" fill="#F59E0B" />
+                        <!-- Round Head -->
+                        <circle cx="50" cy="56" r="36" fill="#DBEAFE" />
+                        <!-- Eyes -->
+                        <circle cx="37" cy="56" r="4.5" fill="#1E293B" />
+                        <circle cx="63" cy="56" r="4.5" fill="#1E293B" />
+                        <circle cx="39" cy="54" r="1.5" fill="#FFFFFF" />
+                        <circle cx="65" cy="54" r="1.5" fill="#FFFFFF" />
+                        <!-- Blush -->
+                        <ellipse cx="30" cy="62" rx="6" ry="3.5" fill="#F472B6" opacity="0.85" />
+                        <ellipse cx="70" cy="62" rx="6" ry="3.5" fill="#F472B6" opacity="0.85" />
+                        <!-- Smile -->
+                        <path d="M 44 64 Q 50 70 56 64" stroke="#1E293B" stroke-width="2.5" fill="none" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <span class="assistant-status-dot"></span>
+            </div>
+            <div>
+                <div class="assistant-title" id="assistant-header-title">Trợ Lý AI TutorLink</div>
+                <div class="assistant-subtitle">
+                    <span class="online-indicator"></span> Trợ lý ảo sẵn sàng hỗ trợ 24/7
+                </div>
+            </div>
+        </div>
+        <button type="button" id="assistant-close-btn" class="assistant-close-btn" aria-label="Đóng bảng hỗ trợ" title="Đóng (Esc)">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <!-- Chat Body / Messages -->
+    <div id="assistant-body" class="assistant-body">
+        <!-- Welcome message -->
+        <div class="assistant-msg bot-msg">
+            <div class="msg-bubble p-3">
+                <div class="d-flex align-items-center gap-2.5 mb-2 pb-2 border-bottom">
+                    <div class="assistant-avatar" style="width: 38px; height: 38px; border: 2px solid #FFFFFF;">
+                        <svg viewBox="0 0 100 100" width="32" height="32">
+                            <polygon points="50,14 16,28 50,38 84,28" fill="#1E3A8A" />
+                            <polygon points="50,14 84,28 78,31 50,18" fill="#3B82F6" opacity="0.8" />
+                            <rect x="40" y="34" width="20" height="9" rx="4" fill="#1E3A8A" />
+                            <line x1="76" y1="29" x2="80" y2="44" stroke="#F59E0B" stroke-width="2.5" />
+                            <circle cx="80" cy="45" r="2.5" fill="#F59E0B" />
+                            <circle cx="50" cy="56" r="36" fill="#DBEAFE" />
+                            <circle cx="37" cy="56" r="4.5" fill="#1E293B" />
+                            <circle cx="63" cy="56" r="4.5" fill="#1E293B" />
+                            <ellipse cx="30" cy="62" rx="6" ry="3.5" fill="#F472B6" opacity="0.85" />
+                            <ellipse cx="70" cy="62" rx="6" ry="3.5" fill="#F472B6" opacity="0.85" />
+                            <path d="M 44 64 Q 50 70 56 64" stroke="#1E293B" stroke-width="2.5" fill="none" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-dark fs-6" style="line-height: 1.2;">Chào bạn{% if user.is_authenticated %}, {{ user.profile.full_name|default:user.username }}{% endif %}! 👋</div>
+                        <small class="text-primary fw-bold">Trợ lý AI TutorLink 🎓</small>
+                    </div>
+                </div>
+                <p class="mb-2 small text-secondary">
+                    Mình có thể hỗ trợ bạn tìm gia sư giỏi, tìm lớp dạy phù hợp, hướng dẫn đăng tin hoặc tra cứu học phí nhanh chóng! Bạn đang cần hỗ trợ gì?
+                </p>
+                <div class="small fw-semibold text-muted">Chọn nhanh câu hỏi bạn quan tâm:</div>
+            </div>
+        </div>
+
+        <!-- Quick Action Chips (Horizontal Scrollable) -->
+        <div class="assistant-quick-topics-wrap">
+            <div class="assistant-quick-topics">
+                <button type="button" class="quick-chip-btn" data-query="Tôi muốn tìm lớp gia sư thì làm như nào?">
+                    📚 Tìm lớp gia sư?
+                </button>
+                <button type="button" class="quick-chip-btn" data-query="Tìm gia sư giỏi môn Toán, Anh?">
+                    🔍 Tìm gia sư giỏi?
+                </button>
+                <button type="button" class="quick-chip-btn" data-query="Cách đăng tin tìm gia sư?">
+                    📝 Đăng tin tìm gia sư?
+                </button>
+                <button type="button" class="quick-chip-btn" data-query="Mức học phí gia sư thế nào?">
+                    💰 Mức học phí?
+                </button>
+                <button type="button" class="quick-chip-btn" data-query="Quy trình ghép lớp hoạt động ra sao?">
+                    ⚡ Quy trình ghép lớp?
+                </button>
+                <button type="button" class="quick-chip-btn" data-query="Hotline liên hệ quản trị viên?">
+                    📞 Hotline hỗ trợ?
+                </button>
+            </div>
+        </div>
+
+        <!-- Messages Stream Area -->
+        <div id="assistant-stream" class="d-flex flex-column gap-2.5 mt-2"></div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="assistant-input-bar">
+        <form id="assistant-form" class="d-flex align-items-center gap-2 m-0 w-100">
+            <input type="text" id="assistant-input" class="form-control assistant-input" placeholder="Nhập câu hỏi cho AI..." autocomplete="off">
+            <button type="submit" id="assistant-send-btn" class="assistant-send-btn" aria-label="Gửi câu hỏi">
+                <i class="bi bi-arrow-up"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Floating Round Mascot Button (Nút linh vật Trợ lý AI - Vị trí góc dưới phải màn hình chuẩn đẹp, thoáng đãng) -->
+<div id="tutorlink-assistant-container">
+    <div id="assistant-toggle-btn" class="assistant-round-btn" title="Hỏi Trợ Lý AI TutorLink (Nhấp để trò chuyện / Kéo để di chuyển)">
+        <!-- Animated Aura Wave -->
+        <div class="assistant-round-aura"></div>
+
+        <!-- Mascot Circular Disc -->
+        <div class="assistant-round-disc">
+            <svg viewBox="0 0 100 100" width="44" height="44">
+                <!-- Graduation Cap in TutorLink Royal Blue -->
+                <polygon points="50,14 16,28 50,38 84,28" fill="#1E3A8A" />
+                <polygon points="50,14 84,28 78,31 50,18" fill="#3B82F6" opacity="0.8" />
+                <rect x="40" y="34" width="20" height="9" rx="4" fill="#1E3A8A" />
+                <!-- Gold Tassel -->
+                <line x1="76" y1="29" x2="80" y2="44" stroke="#F59E0B" stroke-width="2.5" />
+                <circle cx="80" cy="45" r="2.5" fill="#F59E0B" />
+                <!-- Round Head in Soft Blue -->
+                <circle cx="50" cy="56" r="36" fill="#DBEAFE" />
+                <!-- Friendly Eyes -->
+                <circle cx="37" cy="56" r="4.5" fill="#1E293B" />
+                <circle cx="63" cy="56" r="4.5" fill="#1E293B" />
+                <circle cx="39" cy="54" r="1.5" fill="#FFFFFF" />
+                <circle cx="65" cy="54" r="1.5" fill="#FFFFFF" />
+                <!-- Cute Pink Blush Cheeks -->
+                <ellipse cx="30" cy="62" rx="6" ry="3.5" fill="#F472B6" opacity="0.85" />
+                <ellipse cx="70" cy="62" rx="6" ry="3.5" fill="#F472B6" opacity="0.85" />
+                <!-- Sweet Smile -->
+                <path d="M 44 64 Q 50 70 56 64" stroke="#1E293B" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            </svg>
+            
+            <!-- Online status indicator dot -->
+            <span class="assistant-online-dot"></span>
+        </div>
+
+        <!-- Compact Bottom Name Tag (Hỏi Trợ Lý) -->
+        <div class="assistant-round-tag">
+            <span>Hỏi Trợ Lý</span>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Assistant Widget Container - Cố định ở góc dưới phải màn hình chuẩn đẹp, hợp lý nhất */
+#tutorlink-assistant-container {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 1060;
+    font-family: inherit;
+    touch-action: none;
+}
+
+/* Floating Round Button - Thiết kế tổng quan tròn trịa, cân đối, cực kỳ hiện đại */
+.assistant-round-btn {
+    position: relative;
+    width: 68px;
+    height: 74px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+    animation: assistantFloating 3.6s ease-in-out infinite;
+}
+
+/* Khi mở bảng chat, nút linh vật ẩn nhẹ nhàng để không bị đè hay lòi ra một nửa xấu xí */
+.assistant-round-btn.modal-open {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.6) translateY(12px);
+}
+
+@keyframes assistantFloating {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.assistant-round-btn:hover {
+    transform: translateY(-4px) scale(1.08);
+}
+
+.assistant-round-btn:hover .assistant-round-disc {
+    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.55), 0 0 0 4px rgba(37, 99, 235, 0.2);
+    border-color: #1D4ED8;
+}
+
+.assistant-round-btn:hover .assistant-round-tag {
+    background: linear-gradient(135deg, #173278 0%, #1D4ED8 100%);
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.45);
+}
+
+/* Round Aura Ring (Hiệu ứng sóng nhẹ lan tỏa) */
+.assistant-round-aura {
+    position: absolute;
+    top: 0;
+    left: 4px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(37, 99, 235, 0.2);
+    z-index: 1;
+    animation: assistantPulseRing 2.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    pointer-events: none;
+}
+
+@keyframes assistantPulseRing {
+    0% {
+        transform: scale(0.9);
+        opacity: 0.8;
+    }
+    60%, 100% {
+        transform: scale(1.35);
+        opacity: 0;
+    }
+}
+
+/* Mascot Disc */
+.assistant-round-disc {
+    position: relative;
+    z-index: 2;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #FFFFFF 0%, #EFF6FF 100%);
+    border: 3px solid #2563EB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 22px rgba(30, 58, 138, 0.35), 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.25s ease;
+}
+
+/* Online Dot */
+.assistant-online-dot {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background-color: #22C55E;
+    border: 2px solid #FFFFFF;
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
+}
+
+/* Compact Ribbon Tag - Hỏi Trợ Lý */
+.assistant-round-tag {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
+    color: #FFFFFF;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    padding: 2.5px 9px;
+    border-radius: 20px;
+    border: 1.5px solid #FFFFFF;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    white-space: nowrap;
+    line-height: 1.2;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Montserrat', sans-serif;
+    transition: all 0.25s ease;
+}
+
+/* Modal Popup Window - Cố định ở góc dưới bên phải, kéo xuống thấp an toàn, không bao giờ bị khuyết */
+.assistant-modal {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    height: 510px;
+    max-height: calc(100vh - 60px);
+    background: #FFFFFF;
+    border-radius: 20px;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 20px 50px -10px rgba(15, 23, 42, 0.32) !important;
+    animation: assistantFadeUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    z-index: 1070;
+}
+
+.assistant-modal.active {
+    display: flex;
+}
+
+@keyframes assistantFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Modal Header with TutorLink Blue Gradient */
+.assistant-header {
+    background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
+    color: #FFFFFF;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.assistant-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #EFF6FF;
+    border: 2px solid #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.assistant-status-dot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 11px;
+    height: 11px;
+    background-color: #22C55E;
+    border: 2px solid #1E3A8A;
+    border-radius: 50%;
+}
+
+.assistant-title {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.assistant-subtitle {
+    font-size: 0.78rem;
+    color: #BFDBFE;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.online-indicator {
+    width: 7px;
+    height: 7px;
+    background-color: #4ADE80;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.assistant-close-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.15s ease;
+}
+
+.assistant-close-btn:hover {
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Chat Body */
+.assistant-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background-color: #F8FAFC;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.assistant-msg {
+    display: flex;
+    width: 100%;
+}
+
+.bot-msg {
+    justify-content: flex-start;
+}
+
+.user-msg {
+    justify-content: flex-end;
+}
+
+.msg-bubble {
+    max-width: 86%;
+    padding: 11px 14px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+.bot-msg .msg-bubble {
+    background-color: #FFFFFF;
+    color: #1E293B;
+    border-radius: 16px 16px 16px 4px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.user-msg .msg-bubble {
+    background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%);
+    color: #FFFFFF;
+    border-radius: 16px 16px 4px 16px;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+}
+
+/* Quick Topic Chips Scrollbar */
+.assistant-quick-topics-wrap {
+    width: 100%;
+    overflow-x: auto;
+    padding: 4px 0 8px 0;
+    scrollbar-width: thin;
+    scrollbar-color: #94A3B8 transparent;
+}
+
+.assistant-quick-topics-wrap::-webkit-scrollbar {
+    height: 6px;
+}
+
+.assistant-quick-topics-wrap::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 10px;
+}
+
+.assistant-quick-topics {
+    display: inline-flex;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.quick-chip-btn {
+    background: #FFFFFF;
+    border: 1.5px solid #CBD5E1;
+    color: #1E293B;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 7px 13px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.quick-chip-btn:hover {
+    border-color: #2563EB;
+    color: #2563EB;
+    background: #EFF6FF;
+    transform: translateY(-1px);
+}
+
+/* Input Bar */
+.assistant-input-bar {
+    padding: 12px 14px;
+    background: #FFFFFF;
+    border-top: 1px solid #E2E8F0;
+}
+
+.assistant-input {
+    border-radius: 12px !important;
+    border: 1.5px solid #E2E8F0 !important;
+    padding: 9px 13px !important;
+    font-size: 0.88rem !important;
+    background: #F8FAFC !important;
+    transition: all 0.2s ease !important;
+}
+
+.assistant-input:focus {
+    border-color: #2563EB !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
+.assistant-send-btn {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+.assistant-send-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.45);
+}
+
+/* Typing Dots Animation */
+.assistant-typing {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 6px;
+}
+
+.typing-dot {
+    width: 6px;
+    height: 6px;
+    background: #2563EB;
+    border-radius: 50%;
+    animation: typingBlink 1.2s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBlink {
+    0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+    40% { transform: scale(1.1); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    #tutorlink-assistant-container {
+        top: 70%;
+        right: 14px;
+    }
+    .assistant-round-btn {
+        width: 60px;
+        height: 66px;
+    }
+    .assistant-round-disc {
+        width: 52px;
+        height: 52px;
+    }
+    .assistant-round-disc svg {
+        width: 38px;
+        height: 38px;
+    }
+    .assistant-round-aura {
+        left: 4px;
+        width: 52px;
+        height: 52px;
+    }
+    .assistant-round-tag {
+        font-size: 0.62rem;
+        padding: 2px 7px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('assistant-toggle-btn');
+    const modal = document.getElementById('assistant-modal');
+    const closeBtn = document.getElementById('assistant-close-btn');
+    const form = document.getElementById('assistant-form');
+    const input = document.getElementById('assistant-input');
+    const stream = document.getElementById('assistant-stream');
+    const body = document.getElementById('assistant-body');
+
+    if (!toggleBtn || !modal) return;
+
+    const container = document.getElementById('tutorlink-assistant-container');
+
+    // Drag & Drop feature: cho phép kéo thả AI Mascot đến bất kỳ vị trí nào
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let initialLeft = 0, initialTop = 0;
+    let hasMoved = false;
+
+    toggleBtn.addEventListener('mousedown', startDrag);
+    toggleBtn.addEventListener('touchstart', startDrag, { passive: false });
+
+    function startDrag(e) {
+        if (e.target.closest('#assistant-modal')) return;
+        isDragging = true;
+        hasMoved = false;
+
+        const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+
+        startX = clientX;
+        startY = clientY;
+
+        const rect = container.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('touchmove', onDrag, { passive: false });
+        document.addEventListener('mouseup', stopDrag);
+        document.addEventListener('touchend', stopDrag);
+    }
+
+    function onDrag(e) {
+        if (!isDragging) return;
+        const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            hasMoved = true;
+            if (e.cancelable) e.preventDefault();
+
+            let newLeft = initialLeft + dx;
+            let newTop = initialTop + dy;
+
+            // Giới hạn trong màn hình
+            const pad = 12;
+            newLeft = Math.max(pad, Math.min(window.innerWidth - 76, newLeft));
+            newTop = Math.max(pad, Math.min(window.innerHeight - 82, newTop));
+
+            container.style.transform = 'none';
+            container.style.left = newLeft + 'px';
+            container.style.top = newTop + 'px';
+            container.style.right = 'auto';
+            container.style.bottom = 'auto';
+        }
+    }
+
+    function stopDrag() {
+        isDragging = false;
+        document.removeEventListener('mousemove', onDrag);
+        document.removeEventListener('touchmove', onDrag);
+        document.removeEventListener('mouseup', stopDrag);
+        document.removeEventListener('touchend', stopDrag);
+    }
+
+    // Các hàm mở và đóng bảng hỗ trợ AI
+    function openModal() {
+        modal.classList.add('active');
+        toggleBtn.classList.add('modal-open');
+        setTimeout(() => input && input.focus(), 150);
+        body.scrollTop = body.scrollHeight;
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+        toggleBtn.classList.remove('modal-open');
+    }
+
+    // Toggle Open/Close khi click nút linh vật
+    toggleBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (hasMoved) {
+            hasMoved = false;
+            return;
+        }
+        if (modal.classList.contains('active')) {
+            closeModal();
+        } else {
+            openModal();
+        }
+    });
+
+    // 1. Tắt ở dấu [X] trên thanh tiêu đề
+    closeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeModal();
+    });
+
+    // Chặn sự kiện click bên trong khung chat để không kích hoạt đóng ngoài
+    modal.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+
+    // 2. Bấm ở phía ngoài khung cũng tắt được (chuẩn UX yêu cầu)
+    document.addEventListener('click', function(e) {
+        if (modal.classList.contains('active')) {
+            if (!modal.contains(e.target) && !toggleBtn.contains(e.target)) {
+                closeModal();
+            }
+        }
+    });
+
+    document.addEventListener('touchstart', function(e) {
+        if (modal.classList.contains('active')) {
+            if (!modal.contains(e.target) && !toggleBtn.contains(e.target)) {
+                closeModal();
+            }
+        }
+    }, { passive: true });
+
+    // Hỗ trợ thêm phím Escape để đóng nhanh
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    // Handle Quick Chips
+    document.querySelectorAll('.quick-chip-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const query = this.getAttribute('data-query');
+            handleUserMessage(query);
+        });
+    });
+
+    // Handle Form Submit
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        input.value = '';
+        handleUserMessage(text);
+    });
+
+    function handleUserMessage(userText) {
+        // 1. Append user bubble
+        appendMessage(userText, 'user');
+        body.scrollTop = body.scrollHeight;
+
+        // 2. Show typing indicator
+        const typingId = showTypingIndicator();
+        body.scrollTop = body.scrollHeight;
+
+        // 3. Call AI Backend API
+        fetch('/api/assistant/chat/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: userText })
+        })
+        .then(res => res.json())
+        .then(data => {
+            removeTypingIndicator(typingId);
+            const botAnswer = data.reply || getClientFallbackResponse(userText);
+            appendMessage(botAnswer, 'bot');
+            body.scrollTop = body.scrollHeight;
+        })
+        .catch(err => {
+            // Fallback to local intelligent response if network issue
+            removeTypingIndicator(typingId);
+            const botAnswer = getClientFallbackResponse(userText);
+            appendMessage(botAnswer, 'bot');
+            body.scrollTop = body.scrollHeight;
+        });
+    }
+
+    function appendMessage(content, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `assistant-msg ${sender}-msg`;
+
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble';
+        bubble.innerHTML = content;
+
+        msgDiv.appendChild(bubble);
+        stream.appendChild(msgDiv);
+    }
+
+    function showTypingIndicator() {
+        const id = 'typing-' + Date.now();
+        const msgDiv = document.createElement('div');
+        msgDiv.id = id;
+        msgDiv.className = 'assistant-msg bot-msg';
+        msgDiv.innerHTML = `
+            <div class="msg-bubble">
+                <div class="assistant-typing">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </div>
+            </div>
+        `;
+        stream.appendChild(msgDiv);
+        return id;
+    }
+
+    function removeTypingIndicator(id) {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    }
+
+    // Local Client Fallback Engine
+    function getClientFallbackResponse(query) {
+        const q = query.toLowerCase();
+
+        if (q.includes('tìm lớp') || q.includes('lớp gia sư') || q.includes('nhận lớp') || q.includes('ứng tuyển') || q.includes('lớp dạy')) {
+            return `Để <strong>tìm lớp nhận dạy</strong>, bạn hãy vào mục <strong>Lớp Cần Gia Sư</strong>.<br><br>Tại đây có danh sách các yêu cầu tìm gia sư từ phụ huynh với đầy đủ mức lương và địa chỉ/Online.<br><br>
+            <a href="/classes/" class="btn btn-sm btn-primary text-white fw-bold px-3 py-1.5" style="border-radius: 8px; text-decoration: none;">
+                👉 Xem Danh Sách Lớp Cần Gia Sư
+            </a>`;
+        }
+
+        if (q.includes('tìm gia sư') || q.includes('xem gia sư') || q.includes('danh sách gia sư') || q.includes('chọn gia sư')) {
+            return `Bạn có thể xem hồ sơ các gia sư đã được kiểm duyệt bằng cấp và đánh giá sao tại đây:<br><br>
+            <a href="/tutors/" class="btn btn-sm btn-primary text-white fw-bold px-3 py-1.5" style="border-radius: 8px; text-decoration: none;">
+                👉 Xem Danh Sách Gia Sư
+            </a>`;
+        }
+
+        if (q.includes('đăng tin') || q.includes('đăng bài') || q.includes('cần gia sư') || q.includes('tạo lớp')) {
+            return `Để đăng tin tìm gia sư, bạn chỉ cần điền môn học, thời gian và mức học phí mong muốn. Các gia sư phù hợp sẽ trực tiếp ứng tuyển:<br><br>
+            <a href="/classes/post/" class="btn btn-sm btn-success text-white fw-bold px-3 py-1.5" style="border-radius: 8px; text-decoration: none;">
+                📝 Đăng Bài Tìm Gia Sư Ngay
+            </a>`;
+        }
+
+        if (q.includes('học phí') || q.includes('giá') || q.includes('chi phí') || q.includes('tiền') || q.includes('bao nhiêu')) {
+            return `Mức học phí trên TutorLink rất linh hoạt:<br>
+            • <strong>Sinh viên xuất sắc:</strong> 120.000đ – 180.000đ/giờ.<br>
+            • <strong>Giáo viên / Thạc sĩ:</strong> 200.000đ – 350.000đ/giờ.<br>
+            • <strong>Luyện thi IELTS / Chuyên:</strong> 350.000đ – 500.000đ+/giờ.<br>
+            Bạn có thể dùng bộ lọc học phí tại trang <strong>Tìm Gia Sư</strong> để chọn mức giá vừa ý nhất!`;
+        }
+
+        return `Cảm ơn câu hỏi của bạn! Bạn có thể xem nhanh qua các dịch vụ của TutorLink hoặc liên hệ hotline <strong>1900 6868</strong> để được hỗ trợ chi tiết nhé! ✨`;
+    }
+});
+</script>

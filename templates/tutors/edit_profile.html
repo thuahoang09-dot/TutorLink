@@ -1,0 +1,1027 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Hồ Sơ Gia Sư – TutorLink{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ==========================================================================
+   TUTOR PROFILE EDIT / REGISTRATION SYSTEM (CHUẨN FORM TRUNG TÂM GIA SƯ)
+   ========================================================================== */
+
+/* Main Containers */
+.tt-sidebar-card {
+    background-color: var(--card-bg, #ffffff);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 6px;
+    padding: 20px 14px;
+}
+
+.tt-form-card {
+    background-color: var(--card-bg, #ffffff);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 6px;
+    padding: 28px 32px;
+}
+
+/* Sidebar Navigation Items */
+.tt-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 4px;
+    color: var(--text-secondary, #4b5563);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+}
+
+.tt-nav-item:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+.tt-nav-item.active {
+    background-color: #eef2ff;
+    color: #23527c;
+    font-weight: 600;
+}
+
+[data-bs-theme="dark"] .tt-nav-item:hover {
+    background-color: #242526;
+    color: #e4e6eb;
+}
+
+[data-bs-theme="dark"] .tt-nav-item.active {
+    background-color: #1e293b;
+    color: #60a5fa;
+}
+
+/* Ribbon Banner */
+.tt-section-banner {
+    border-bottom: 2px solid #23527c;
+    margin-bottom: 1.25rem;
+    margin-top: 1.75rem;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+}
+
+.tt-banner-badge {
+    display: inline-block;
+    background-color: #23527c;
+    color: #ffffff;
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 6px 16px;
+    text-transform: uppercase;
+}
+
+[data-bs-theme="dark"] .tt-section-banner {
+    border-bottom-color: #2563eb;
+}
+[data-bs-theme="dark"] .tt-banner-badge {
+    background-color: #2563eb;
+}
+
+/* Form Controls */
+.tt-form-label {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--text-primary, #333333);
+    margin-bottom: 4px;
+}
+
+.form-control, .form-select {
+    border: 1px solid #d9d9d9;
+    border-radius: 3px;
+    padding: 7px 11px;
+    font-size: 0.88rem;
+    color: var(--text-primary, #262626);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #23527c;
+    box-shadow: 0 0 0 2px rgba(35, 82, 124, 0.2);
+}
+
+[data-bs-theme="dark"] .form-control, 
+[data-bs-theme="dark"] .form-select {
+    background-color: #242526;
+    border-color: #3e4042;
+    color: #e4e6eb;
+}
+
+/* Notice Box */
+.tt-notice-alert {
+    background-color: #fff9e6;
+    border: 1px solid #ffe58f;
+    color: #873800;
+    padding: 12px 16px;
+    font-size: 0.84rem;
+    line-height: 1.6;
+    border-radius: 3px;
+}
+
+[data-bs-theme="dark"] .tt-notice-alert {
+    background-color: #2b2611;
+    border-color: #5c4710;
+    color: #ffd666;
+}
+
+/* Topic & Subject Tags */
+.tt-topic-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background-color: #f5f5f5;
+    border: 1px solid #d9d9d9;
+    color: #333333;
+    font-size: 0.82rem;
+    border-radius: 2px;
+}
+
+.tt-topic-tag .btn-close-tag {
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: #888;
+}
+.tt-topic-tag .btn-close-tag:hover {
+    color: #ff4d4f;
+}
+
+/* Schedule Table */
+.schedule-box {
+    border-radius: 12px;
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    padding: 1.25rem;
+}
+
+.tt-schedule-table {
+    border-collapse: separate;
+    border-spacing: 6px 6px;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.tt-schedule-table th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--bs-body-color, #333333);
+    text-align: center;
+    padding: 6px 0;
+}
+
+.tt-schedule-cell {
+    border: 1px solid #ced4da;
+    background-color: var(--bs-body-bg, #ffffff);
+    color: var(--bs-secondary-color, #6c757d);
+    border-radius: 6px;
+    padding: 8px 0;
+    font-size: 0.84rem;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+}
+
+.tt-schedule-cell:hover {
+    border-color: #fa8c16;
+    color: #fa8c16;
+    background-color: rgba(250, 140, 22, 0.08);
+    transform: translateY(-1px);
+}
+
+.tt-schedule-cell.active {
+    border-color: #fa8c16 !important;
+    background-color: #fa8c16 !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(250, 140, 22, 0.35);
+}
+
+[data-bs-theme="dark"] .tt-schedule-cell {
+    background-color: #212529;
+    border-color: #495057;
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .tt-schedule-cell:hover {
+    background-color: rgba(250, 140, 22, 0.15);
+}
+
+[data-bs-theme="dark"] .tt-schedule-cell.active {
+    border-color: #fa8c16 !important;
+    background-color: #fa8c16 !important;
+    color: #ffffff !important;
+}
+
+.preset-btn {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+}
+
+/* Image Upload Cards */
+.tt-upload-box {
+    border: 1px solid #d9d9d9;
+    background-color: var(--card-bg, #ffffff);
+    border-radius: 3px;
+    padding: 8px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.tt-upload-box:hover {
+    border-color: #23527c;
+}
+
+.tt-upload-preview {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    border-radius: 2px;
+    border: 1px solid #e8e8e8;
+    background-color: #f7f7f7;
+    cursor: pointer;
+    display: block;
+}
+
+.tt-upload-tip {
+    font-size: 0.77rem;
+    color: var(--text-secondary, #595959);
+    line-height: 1.5;
+    text-align: left;
+    margin-top: 8px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- ==================================================================
+             LEFT SIDEBAR: QUẢN LÝ GIA SƯ (GIỐNG ẢNH MẪU 100%)
+             ================================================================== -->
+        <div class="col-lg-3 col-md-4">
+            <div class="tt-sidebar-card shadow-sm sticky-top" style="top: 80px; z-index: 10;">
+                <!-- Profile Avatar & Info -->
+                <div class="text-center mb-3">
+                    <div class="position-relative d-inline-block mx-auto mb-2">
+                        <img src="{{ request.user.profile.get_avatar_url }}" 
+                             alt="{{ request.user.profile.full_name }}" 
+                             id="sidebar-avatar-img"
+                             class="rounded-circle shadow-sm" 
+                             style="width: 86px; height: 86px; object-fit: cover; border: 3px solid #e5e7eb;">
+                    </div>
+                    <h5 class="fw-bold mb-1" style="font-size: 1.05rem; color: #111827;">
+                        {{ request.user.profile.full_name|default:request.user.username }}
+                    </h5>
+                    <div class="mt-1 mb-2">
+                        {% if tutor_profile.approval_status == 'approved' %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill small px-3 py-1">
+                                <i class="bi bi-shield-fill-check me-1"></i>Đã kiểm duyệt
+                            </span>
+                        {% else %}
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill small px-3 py-1">
+                                <i class="bi bi-hourglass-split me-1"></i>{{ tutor_profile.get_approval_status_display }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Vertical Menu (Chỉ giữ lại các chức năng thực tế của TutorLink) -->
+                <div class="d-flex flex-column gap-1 pt-2 border-top">
+                    <a href="{% url 'dashboard:tutor_dashboard' %}" class="tt-nav-item">
+                        <i class="bi bi-speedometer2 fs-6 text-muted"></i>
+                        <span>Quản lý chung</span>
+                    </a>
+                    <a href="{% url 'class_requests:class_list' %}" class="tt-nav-item">
+                        <i class="bi bi-card-list fs-6 text-muted"></i>
+                        <span>Tìm lớp mới</span>
+                    </a>
+                    <a href="{% url 'tutor_classes' %}" class="tt-nav-item">
+                        <i class="bi bi-person-workspace fs-6 text-muted"></i>
+                        <span>Lớp đang dạy</span>
+                    </a>
+                    <a href="{% url 'tutor_requests' %}" class="tt-nav-item">
+                        <i class="bi bi-envelope fs-6 text-muted"></i>
+                        <span>Yêu cầu học</span>
+                    </a>
+                    <a href="{% url 'tutor_applications' %}" class="tt-nav-item">
+                        <i class="bi bi-send-check fs-6 text-muted"></i>
+                        <span>Đơn ứng tuyển</span>
+                    </a>
+                    <a href="{% url 'tutors:tutor_detail' tutor_profile.pk %}" class="tt-nav-item">
+                        <i class="bi bi-eye fs-6 text-muted"></i>
+                        <span>Hồ sơ công khai</span>
+                    </a>
+                    <a href="{% url 'tutors:edit_tutor_profile' %}" class="tt-nav-item active">
+                        <i class="bi bi-gear-fill fs-6" style="color: #23527c;"></i>
+                        <span>Cài đặt hồ sơ</span>
+                    </a>
+                    <form method="post" action="{% url 'accounts:logout' %}" class="mt-2 pt-2 border-top">
+                        {% csrf_token %}
+                        <button type="submit" class="tt-nav-item text-danger w-100">
+                            <i class="bi bi-box-arrow-right fs-6"></i>
+                            <span>Đăng xuất</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================================================================
+             MAIN FORM CONTENT: THÔNG TIN HỒ SƠ GIA SƯ (GIỐNG ẢNH MẪU 100%)
+             ================================================================== -->
+        <div class="col-lg-9 col-md-8">
+            <div class="tt-form-card shadow-sm mb-5">
+                <!-- Welcome Note -->
+                <div class="mb-3">
+                    <h6 class="fw-bold mb-1" style="color: #262626; font-size: 0.95rem;">
+                        Chào mừng bạn tham gia cộng đồng gia sư TutorLink Việt Nam!
+                    </h6>
+                    <p class="small mb-0 text-secondary" style="font-size: 0.85rem; line-height: 1.6;">
+                        <strong>LƯU Ý:</strong> Sau khi tạo xong hồ sơ, bạn có thể sửa các thông tin bất kì lúc nào bạn muốn. Vì vậy, bạn đừng quá lo lắng khi điền các thông tin dưới đây nhé :)
+                    </p>
+                </div>
+                <hr class="my-3 opacity-25">
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show small py-2" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if tutor_profile.admin_feedback %}
+                    <div class="alert alert-warning py-2 small mb-3">
+                        <strong>Ghi chú từ Ban quản trị:</strong> {{ tutor_profile.admin_feedback }}
+                    </div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" id="tutorEditForm">
+                    {% csrf_token %}
+                    {{ form.available_schedule }}
+
+                    <!-- ==========================================================
+                         1. SECTION: THÔNG TIN CÁ NHÂN
+                         ========================================================== -->
+                    <div class="tt-section-banner">
+                        <span class="tt-banner-badge">THÔNG TIN CÁ NHÂN</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Họ tên đầy đủ <span class="text-danger">*</span></label>
+                            {{ form.full_name }}
+                            {% if form.full_name.errors %}<div class="text-danger small mt-1">{{ form.full_name.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Giới tính gia sư <span class="text-danger">*</span></label>
+                            {{ form.gender }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Quê quán <span class="text-danger">*</span></label>
+                            {{ form.hometown }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Ngày sinh <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                {{ form.birth_date }}
+                                <span class="input-group-text bg-white"><i class="bi bi-calendar3"></i></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Giọng nói <span class="text-danger">*</span></label>
+                            {{ form.voice }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Kết nối Facebook của bạn <span class="text-danger">*</span></label>
+                            {{ form.facebook_link }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Số điện thoại <span class="text-danger">*</span></label>
+                            {{ form.phone }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Email <span class="text-danger">*</span></label>
+                            {{ form.email }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Tỉnh/thành (Địa điểm dạy) <span class="text-danger">*</span></label>
+                            {{ form.location }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Địa chỉ hiện tại <span class="text-danger">*</span></label>
+                            {{ form.detailed_address }}
+                        </div>
+                    </div>
+
+                    <!-- ==========================================================
+                         2. SECTION: THÔNG TIN GIA SƯ
+                         ========================================================== -->
+                    <div class="tt-section-banner">
+                        <span class="tt-banner-badge">THÔNG TIN GIA SƯ</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="tt-form-label">Kinh nghiệm đi gia sư và giảng dạy (chi tiết) <span class="text-danger">*</span></label>
+                            {{ form.experience }}
+                            <div class="form-text small text-muted">
+                                VD: Đã có kinh nghiệm dạy học sinh khối 12 đạt điểm 8+; tạo nền tảng vững chắc cho học sinh mất gốc; kỹ năng truyền đạt dễ hiểu.
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="tt-form-label">Thành tích học tập và dạy học (chi tiết) <span class="text-danger">*</span></label>
+                            {{ form.achievements }}
+                            <div class="form-text small text-muted">
+                                VD: Đạt 26 điểm khối A00; Điểm thi ĐGNL 112/150; Đạt 12 năm học sinh giỏi liên tiếp; Trúng tuyển nhiều trường ĐH top đầu.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ==========================================================
+                         3. SECTION: HỒ SƠ CHUYÊN MÔN
+                         ========================================================== -->
+                    <div class="tt-section-banner">
+                        <span class="tt-banner-badge">HỒ SƠ CHUYÊN MÔN</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="tt-form-label">Bạn đang là <span class="text-danger">*</span></label>
+                            {{ form.tutor_type }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Trường đang học / đã tốt nghiệp <span class="text-danger">*</span></label>
+                            {{ form.university }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Sinh viên năm <span class="text-danger">*</span></label>
+                            {{ form.student_year }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Chuyên ngành <span class="text-danger">*</span></label>
+                            {{ form.major }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Bậc học <span class="text-danger">*</span></label>
+                            {{ form.academic_level }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Hình thức dạy <span class="text-danger">*</span></label>
+                            {{ form.teaching_method }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Học phí vnđ/ buổi (Tham khảo học phí <a href="{% url 'tutors:tutor_list' %}" class="text-primary text-decoration-none">TẠI ĐÂY</a>) <span class="text-danger">*</span></label>
+                            {{ form.price_per_hour }}
+                        </div>
+
+                        <!-- Môn học sẽ dạy -->
+                        <div class="col-md-12">
+                            <label class="tt-form-label d-flex justify-content-between align-items-center">
+                                <span>Môn học sẽ dạy <span class="text-danger">*</span></span>
+                                <span class="small text-muted fw-normal">Chọn tối đa 3 môn</span>
+                            </label>
+                            <div class="p-3 border rounded-2 bg-light-subtle">
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for sub in pho_thong_subjects %}
+                                        <div>
+                                            <input type="checkbox" name="subjects" value="{{ sub.id }}" id="sub_{{ sub.id }}" class="btn-check subject-checkbox" {% if sub.id in selected_subject_ids %}checked{% endif %} autocomplete="off">
+                                            <label class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" for="sub_{{ sub.id }}">
+                                                {{ sub.name }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                    {% for sub in ngoai_ngu_subjects %}
+                                        <div>
+                                            <input type="checkbox" name="subjects" value="{{ sub.id }}" id="sub_{{ sub.id }}" class="btn-check subject-checkbox" {% if sub.id in selected_subject_ids %}checked{% endif %} autocomplete="off">
+                                            <label class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" for="sub_{{ sub.id }}">
+                                                {{ sub.name }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                    {% for sub in the_thao_subjects %}
+                                        <div>
+                                            <input type="checkbox" name="subjects" value="{{ sub.id }}" id="sub_{{ sub.id }}" class="btn-check subject-checkbox" {% if sub.id in selected_subject_ids %}checked{% endif %} autocomplete="off">
+                                            <label class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" for="sub_{{ sub.id }}">
+                                                {{ sub.name }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chủ đề dạy -->
+                        <div class="col-md-12">
+                            <label class="tt-form-label">Chủ đề môn dạy (phân cách bằng dấu phẩy) <span class="text-danger">*</span></label>
+                            {{ form.teaching_topics }}
+                            <!-- Quick add badges -->
+                            <div class="d-flex flex-wrap gap-1 mt-2">
+                                <span class="badge bg-secondary-subtle text-secondary border cursor-pointer" onclick="appendTopic('Toán cấp 1')">+ Toán cấp 1</span>
+                                <span class="badge bg-secondary-subtle text-secondary border cursor-pointer" onclick="appendTopic('Toán cấp 2')">+ Toán cấp 2</span>
+                                <span class="badge bg-secondary-subtle text-secondary border cursor-pointer" onclick="appendTopic('Toán cấp 3')">+ Toán cấp 3</span>
+                                <span class="badge bg-secondary-subtle text-secondary border cursor-pointer" onclick="appendTopic('Tiếng anh giao tiếp')">+ Tiếng anh giao tiếp</span>
+                                <span class="badge bg-secondary-subtle text-secondary border cursor-pointer" onclick="appendTopic('Tiếng anh cấp 1-2')">+ Tiếng anh cấp 1-2</span>
+                                <span class="badge bg-secondary-subtle text-secondary border cursor-pointer" onclick="appendTopic('Vật lý cấp 3')">+ Vật lý cấp 3</span>
+                                <span class="badge bg-secondary-subtle text-secondary border cursor-pointer" onclick="appendTopic('Hóa học cấp 3')">+ Hóa học cấp 3</span>
+                            </div>
+                        </div>
+
+                        <!-- Số lượng lớp đã dạy -->
+                        <div class="col-md-12">
+                            <label class="tt-form-label">Số lượng lớp đã dạy <span class="text-danger">*</span></label>
+                            {{ form.taught_classes_count }}
+                        </div>
+
+                        <!-- ==========================================================
+                             THỜI GIAN CÓ THỂ DẠY (Ma trận 2 bảng hiện đại chuẩn TutorLink)
+                             ========================================================== -->
+                        <div class="col-md-12">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
+                                <label class="tt-form-label mb-0">
+                                    <i class="bi bi-calendar3-week text-primary me-1"></i> Thời gian có thể dạy <span class="text-danger">*</span>
+                                    <span class="fw-normal text-muted small ms-1">( <span class="fw-bold" style="color: #fa8c16;">Màu CAM</span> hiển thị những lịch có thể dạy )</span>
+                                </label>
+                                <!-- Phím tắt chọn nhanh -->
+                                <div class="d-flex flex-wrap gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="applyPresetSchedule('toi_246')">⚡ Tối 2, 4, 6</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="applyPresetSchedule('toi_357')">⚡ Tối 3, 5, 7</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="applyPresetSchedule('cuoi_tuan')">⚡ Cuối tuần (T7, CN)</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary preset-btn" onclick="applyPresetSchedule('tat_ca_toi')">⚡ Tất cả các tối</button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger preset-btn" onclick="clearSchedule()">🔄 Xóa chọn</button>
+                                </div>
+                            </div>
+
+                            <!-- Ma trận 2 bảng: Thứ 2-Thứ 6 (col-lg-8) và Thứ 7-Chủ nhật (col-lg-4) -->
+                            <div class="schedule-box">
+                                <div class="row g-3">
+                                    <!-- Bảng 1: Thứ 2 đến Thứ 6 (5 cột) -->
+                                    <div class="col-lg-8">
+                                        <div class="text-center small fw-semibold text-muted mb-1">Các ngày trong tuần (Thứ 2 - Thứ 6)</div>
+                                        <div class="table-responsive">
+                                            <table class="table table-borderless text-center align-middle tt-schedule-table mb-0" style="table-layout: fixed;">
+                                                <thead>
+                                                    <tr>
+                                                        {% for day_key, day_name in timetable.weekdays %}
+                                                            <th style="width: 20%;">{{ day_name }}</th>
+                                                        {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="interactive-schedule-grid">
+                                                    {% for row in timetable.weekday_rows %}
+                                                        <tr>
+                                                            {% for slot in row.slots %}
+                                                                <td class="p-1">
+                                                                    <div class="tt-schedule-cell {% if slot.is_active %}active{% endif %}" 
+                                                                         data-day="{{ slot.day_key }}" 
+                                                                         data-day-name="{{ slot.day_name }}"
+                                                                         data-period="{{ slot.period_key }}" 
+                                                                         data-period-name="{{ slot.period_name }}"
+                                                                         onclick="toggleScheduleCell(this)">
+                                                                        {{ slot.period_name }}
+                                                                    </div>
+                                                                </td>
+                                                            {% endfor %}
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bảng 2: Thứ 7 & Chủ nhật (2 cột) -->
+                                    <div class="col-lg-4">
+                                        <div class="text-center small fw-semibold text-muted mb-1">Cuối tuần</div>
+                                        <div class="table-responsive">
+                                            <table class="table table-borderless text-center align-middle tt-schedule-table mb-0" style="table-layout: fixed;">
+                                                <thead>
+                                                    <tr>
+                                                        {% for day_key, day_name in timetable.weekend %}
+                                                            <th style="width: 50%;">{{ day_name }}</th>
+                                                        {% endfor %}
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="interactive-schedule-grid">
+                                                    {% for row in timetable.weekend_rows %}
+                                                        <tr>
+                                                            {% for slot in row.slots %}
+                                                                <td class="p-1">
+                                                                    <div class="tt-schedule-cell {% if slot.is_active %}active{% endif %}" 
+                                                                         data-day="{{ slot.day_key }}" 
+                                                                         data-day-name="{{ slot.day_name }}"
+                                                                         data-period="{{ slot.period_key }}" 
+                                                                         data-period-name="{{ slot.period_name }}"
+                                                                         onclick="toggleScheduleCell(this)">
+                                                                        {{ slot.period_name }}
+                                                                    </div>
+                                                                </td>
+                                                            {% endfor %}
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Thanh trạng thái đã chọn -->
+                                <div class="mt-3 pt-3 border-top d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                    <div id="schedule_summary_badge" class="badge bg-secondary-subtle text-secondary border px-3 py-2 fw-semibold">
+                                        <i class="bi bi-clock me-1"></i> <span id="schedule_summary_text">Chưa chọn buổi nào</span>
+                                    </div>
+                                    <div class="small text-muted">
+                                        <i class="bi bi-info-circle me-1 text-primary"></i> Nhấp chuột vào các ô để bật / tắt lịch rảnh của bạn trong tuần
+                                    </div>
+                                </div>
+                            </div>
+                            {% if form.available_schedule.errors %}<div class="text-danger small mt-1">{{ form.available_schedule.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- ==========================================================
+                         4. SECTION: ẢNH XÁC NHẬN THÔNG TIN GIA SƯ
+                         ========================================================== -->
+                    <div class="tt-section-banner">
+                        <span class="tt-banner-badge">ẢNH XÁC NHẬN THÔNG TIN GIA SƯ</span>
+                    </div>
+
+                    <!-- Notice Alert -->
+                    <div class="tt-notice-alert mb-4">
+                        Chúng tôi chỉ đồng ý duyệt hồ sơ, khi đã xác thực thông tin của bạn. Điều này giúp chúng tôi yên tâm hơn khi hỗ trợ bạn nợ phí nhận lớp và cam kết chất lượng với người học.
+                    </div>
+
+                    <!-- Upload inputs (hidden) -->
+                    <input type="file" name="avatar" id="id_avatar" class="d-none" accept="image/*" onchange="previewUploadedImage(this, 'preview-avatar', 'sidebar-avatar-img')">
+                    {{ form.id_card_front }}
+                    {{ form.student_card_1 }}
+                    {{ form.student_card_2 }}
+                    {{ form.student_card_3 }}
+
+                    <div class="row g-4 mb-4">
+                        <!-- 1. Ảnh đại diện -->
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Ảnh đại diện (chụp một mình, nhìn rõ mặt) <span class="text-danger">*</span></label>
+                            <div class="tt-upload-box">
+                                <img src="{{ request.user.profile.get_avatar_url }}" 
+                                     id="preview-avatar" 
+                                     class="tt-upload-preview" 
+                                     onclick="document.getElementById('id_avatar').click()" 
+                                     alt="Ảnh đại diện">
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-sm btn-outline-primary w-100" onclick="document.getElementById('id_avatar').click()">
+                                        <i class="bi bi-camera me-1"></i> Chọn ảnh đại diện
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="tt-upload-tip">
+                                <strong>Tip:</strong> Để thể hiện sự chuyên nghiệp của mình với học viên & phụ huynh, bạn hãy chọn ảnh đại diện đẹp, chụp một mình và nhìn rõ khuôn mặt.
+                            </div>
+                        </div>
+
+                        <!-- 2. Ảnh CMT / Căn cước / Hộ chiếu -->
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Ảnh CMT/Căn cước/Hộ chiếu (Mặt trước) <span class="text-danger">*</span></label>
+                            <div class="tt-upload-box">
+                                <img src="{% if tutor_profile.id_card_front %}{{ tutor_profile.id_card_front.url }}{% else %}https://placehold.co/400x260/e2e8f0/475569?text=Ảnh+CCCD+/+CMT+Mặt+Trước{% endif %}" 
+                                     id="preview-id-card" 
+                                     class="tt-upload-preview" 
+                                     onclick="document.getElementById('id_id_card_front').click()" 
+                                     alt="Ảnh CCCD">
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-sm btn-outline-primary w-100" onclick="document.getElementById('id_id_card_front').click()">
+                                        <i class="bi bi-upload me-1"></i> Tải ảnh CCCD / CMT
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="tt-upload-tip">
+                                <strong>Tip:</strong> Dùng để xác thực cá nhân khi tới dạy, ảnh chụp phải rõ nét, không bị mờ chữ, có thể đọc được số. Chúng tôi cam kết bảo mật, không hiển thị.
+                            </div>
+                        </div>
+
+                        <!-- 3. Thẻ sinh viên / Bằng chứng chỉ 1 -->
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Thẻ sinh viên/bằng/chứng chỉ (tối đa 3 ảnh)</label>
+                            <div class="tt-upload-box">
+                                <img src="{% if tutor_profile.student_card_1 %}{{ tutor_profile.student_card_1.url }}{% else %}https://placehold.co/400x260/f1f5f9/64748b?text=Bằng+cấp+/+Bảng+điểm+1{% endif %}" 
+                                     id="preview-student-card-1" 
+                                     class="tt-upload-preview" 
+                                     onclick="document.getElementById('id_student_card_1').click()" 
+                                     alt="Chứng chỉ 1">
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" onclick="document.getElementById('id_student_card_1').click()">
+                                        <i class="bi bi-upload me-1"></i> Tải Thẻ SV / Bằng 1
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="tt-upload-tip">
+                                <strong>Tip:</strong> Hãy cập nhật ảnh chụp thẻ sinh viên hoặc Bằng cấp chuyên môn CAO NHẤT của bạn. Chúng tôi cam kết bảo mật, không hiển thị.
+                            </div>
+                        </div>
+
+                        <!-- 4. Thẻ sinh viên / Bằng chứng chỉ 2 & 3 -->
+                        <div class="col-md-6">
+                            <label class="tt-form-label">Thẻ sinh viên/bằng/chứng chỉ 2 & 3</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="tt-upload-box">
+                                        <img src="{% if tutor_profile.student_card_2 %}{{ tutor_profile.student_card_2.url }}{% else %}https://placehold.co/300x260/f8fafc/94a3b8?text=Thẻ+SV+2{% endif %}" 
+                                             id="preview-student-card-2" 
+                                             class="tt-upload-preview" 
+                                             style="height: 140px;"
+                                             onclick="document.getElementById('id_student_card_2').click()" 
+                                             alt="Thẻ SV 2">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary w-100 mt-1 py-0" style="font-size: 0.75rem;" onclick="document.getElementById('id_student_card_2').click()">
+                                            Tải ảnh 2
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="tt-upload-box">
+                                        <img src="{% if tutor_profile.student_card_3 %}{{ tutor_profile.student_card_3.url }}{% else %}https://placehold.co/300x260/f8fafc/94a3b8?text=Thẻ+SV+3{% endif %}" 
+                                             id="preview-student-card-3" 
+                                             class="tt-upload-preview" 
+                                             style="height: 140px;"
+                                             onclick="document.getElementById('id_student_card_3').click()" 
+                                             alt="Thẻ SV 3">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary w-100 mt-1 py-0" style="font-size: 0.75rem;" onclick="document.getElementById('id_student_card_3').click()">
+                                            Tải ảnh 3
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tt-upload-tip mt-2">
+                                Bổ sung thêm thẻ sinh viên, chứng chỉ IELTS / TOEIC hoặc giấy khen (nếu có).
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ==========================================================
+                         5. SECTION: ẢNH HOẠT ĐỘNG DẠY HỌC VÀ BẢNG THÀNH TÍCH
+                         ========================================================== -->
+                    <div class="tt-section-banner">
+                        <span class="tt-banner-badge">ẢNH HOẠT ĐỘNG DẠY HỌC VÀ BẢNG THÀNH TÍCH</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="tt-form-label small mb-2">
+                            <i class="bi bi-cloud-arrow-up text-primary me-1"></i> Tải lên các tệp minh chứng hoạt động dạy học, bài tập học sinh, chứng nhận giải thưởng:
+                        </label>
+                        <input type="file" 
+                               name="certificate_files" 
+                               id="id_certificate_files" 
+                               class="form-control" 
+                               multiple 
+                               accept=".pdf,.jpg,.jpeg,.png,.webp,.gif">
+
+                        <!-- Danh sách tệp đã lưu -->
+                        {% if certificates %}
+                            <div class="mt-3">
+                                <label class="tt-form-label small text-muted">Các tệp minh chứng đã lưu:</label>
+                                <div class="row g-2">
+                                    {% for cert in certificates %}
+                                        <div class="col-md-6">
+                                            <div class="p-2 px-3 bg-white rounded border d-flex align-items-center justify-content-between shadow-sm">
+                                                <div class="d-flex align-items-center gap-2 text-truncate me-2">
+                                                    <i class="bi {% if cert.is_pdf %}bi-file-earmark-pdf-fill text-danger{% else %}bi-file-earmark-image-fill text-success{% endif %} fs-5"></i>
+                                                    <div class="text-truncate">
+                                                        <div class="text-truncate fw-semibold small text-dark">{{ cert.title|default:cert.filename }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                                    <a href="{{ cert.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" title="Xem tệp">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <button type="submit" 
+                                                            name="delete_cert_id" 
+                                                            value="{{ cert.id }}" 
+                                                            class="btn btn-sm btn-outline-danger py-0 px-2" 
+                                                            title="Xóa tệp" 
+                                                            onclick="return confirm('Bạn có chắc chắn muốn xóa tệp này không?');">
+                                                        <i class="bi bi-trash3"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Bottom Action Buttons -->
+                    <div class="mt-5 pt-3 border-top text-center">
+                        <button type="submit" class="btn text-white fw-bold px-5 py-2.5 shadow-sm rounded-pill" style="background-color: #23527c; font-size: 1.05rem;">
+                            <i class="bi bi-check2-circle me-1"></i> Lưu & Cập Nhật Hồ Sơ Gia Sư
+                        </button>
+                        <div class="mt-2">
+                            <a href="{% url 'tutors:tutor_detail' tutor_profile.pk %}" class="small text-secondary text-decoration-none">
+                                <i class="bi bi-eye me-1"></i> Xem giao diện hiển thị công khai của hồ sơ
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Schedule Constants & Helpers
+const DAY_SHORT = {
+    'mon': 'T2',
+    'tue': 'T3',
+    'wed': 'T4',
+    'thu': 'T5',
+    'fri': 'T6',
+    'sat': 'T7',
+    'sun': 'CN'
+};
+
+const DAY_ORDER = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+// Interactive schedule toggle
+function toggleScheduleCell(cell) {
+    cell.classList.toggle('active');
+    updateScheduleInput();
+}
+
+function updateScheduleInput() {
+    const activeCells = document.querySelectorAll('.interactive-schedule-grid .tt-schedule-cell.active');
+    const schedule = {};
+    const slots = [];
+
+    activeCells.forEach(c => {
+        const day = c.getAttribute('data-day');
+        const period = c.getAttribute('data-period');
+        const dayName = c.getAttribute('data-day-name') || DAY_SHORT[day] || day;
+        const periodName = c.getAttribute('data-period-name') || (period === 'sang' ? 'Sáng' : period === 'chieu' ? 'Chiều' : 'Tối');
+
+        if (!schedule[day]) {
+            schedule[day] = [];
+        }
+        if (!schedule[day].includes(period)) {
+            schedule[day].push(period);
+        }
+
+        slots.push({ day, period, dayName, periodName });
+    });
+
+    const input = document.getElementById('id_available_schedule');
+    if (input) {
+        input.value = JSON.stringify(schedule);
+    }
+
+    // Update human-readable summary badge
+    const summaryText = document.getElementById('schedule_summary_text');
+    const summaryBadge = document.getElementById('schedule_summary_badge');
+    if (!summaryText || !summaryBadge) return;
+
+    if (slots.length === 0) {
+        summaryText.textContent = 'Chưa chọn buổi nào';
+        summaryBadge.className = 'badge bg-secondary-subtle text-secondary border px-3 py-2 fw-semibold';
+        return;
+    }
+
+    // Sort slots by day then period
+    const periodOrder = { 'sang': 1, 'chieu': 2, 'toi': 3 };
+    slots.sort((a, b) => {
+        const dDiff = DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day);
+        if (dDiff !== 0) return dDiff;
+        return (periodOrder[a.period] || 0) - (periodOrder[b.period] || 0);
+    });
+
+    const count = slots.length;
+    const allPeriods = new Set(slots.map(s => s.periodName));
+    let details = '';
+
+    if (allPeriods.size === 1) {
+        const pName = Array.from(allPeriods)[0];
+        const daysStr = slots.map(s => DAY_SHORT[s.day] || s.dayName).join(', ');
+        details = `${pName} ${daysStr}`;
+    } else {
+        details = slots.map(s => `${s.periodName} ${DAY_SHORT[s.day] || s.dayName}`).join(', ');
+    }
+
+    summaryText.textContent = `Đã chọn: ${count} buổi/tuần (${details})`;
+    summaryBadge.className = 'badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2 fw-semibold';
+}
+
+function clearSchedule() {
+    document.querySelectorAll('.interactive-schedule-grid .tt-schedule-cell.active').forEach(c => {
+        c.classList.remove('active');
+    });
+    updateScheduleInput();
+}
+
+function applyPresetSchedule(preset) {
+    clearSchedule();
+    const cells = document.querySelectorAll('.interactive-schedule-grid .tt-schedule-cell');
+
+    cells.forEach(cell => {
+        const day = cell.getAttribute('data-day');
+        const period = cell.getAttribute('data-period');
+
+        if (preset === 'toi_246') {
+            if (['mon', 'wed', 'fri'].includes(day) && period === 'toi') cell.classList.add('active');
+        } else if (preset === 'toi_357') {
+            if (['tue', 'thu', 'sat'].includes(day) && period === 'toi') cell.classList.add('active');
+        } else if (preset === 'cuoi_tuan') {
+            if (['sat', 'sun'].includes(day) && (period === 'sang' || period === 'chieu')) cell.classList.add('active');
+        } else if (preset === 'tat_ca_toi') {
+            if (period === 'toi') cell.classList.add('active');
+        }
+    });
+
+    updateScheduleInput();
+}
+
+// Live Image Preview handler
+function previewUploadedImage(input, previewImgId, sidebarImgId) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById(previewImgId);
+            if (img) {
+                img.src = e.target.result;
+            }
+            if (sidebarImgId) {
+                const sideImg = document.getElementById(sidebarImgId);
+                if (sideImg) {
+                    sideImg.src = e.target.result;
+                }
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Quick append topic badge
+function appendTopic(topicName) {
+    const input = document.getElementById('id_teaching_topics');
+    if (input) {
+        let current = input.value.trim();
+        if (current) {
+            const list = current.split(',').map(s => s.trim());
+            if (!list.includes(topicName)) {
+                input.value = current + ', ' + topicName;
+            }
+        } else {
+            input.value = topicName;
+        }
+    }
+}
+
+// Initialization on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize schedule summary
+    updateScheduleInput();
+
+    // Limit subject selection to max 3
+    const maxSubjects = 3;
+    const checkboxes = document.querySelectorAll('.subject-checkbox');
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll('.subject-checkbox:checked').length;
+            if (checkedCount > maxSubjects) {
+                this.checked = false;
+                alert('Bạn chỉ được chọn tối đa 3 môn học.');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

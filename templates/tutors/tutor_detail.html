@@ -1,0 +1,481 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gia sư {{ tutor.full_name }} – TutorLink{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ==========================================================================
+   GIA SƯ PROFILE LAYOUT (CHUẨN TRUNG TÂM GIA SƯ UY TÍN)
+   ========================================================================== */
+
+/* Main Container Card */
+.tt-profile-card {
+    background-color: var(--card-bg, #ffffff);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 10px;
+    padding: 24px;
+}
+
+/* Ribbon Banner */
+.tt-section-banner {
+    border-bottom: 2px solid #23527c;
+    margin-bottom: 1.1rem;
+    margin-top: 0.5rem;
+    position: relative;
+}
+
+.tt-banner-badge {
+    display: inline-block;
+    background-color: #23527c;
+    color: #ffffff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 6px 16px;
+    text-transform: uppercase;
+}
+
+[data-bs-theme="dark"] .tt-section-banner {
+    border-bottom-color: #2563eb;
+}
+[data-bs-theme="dark"] .tt-banner-badge {
+    background-color: #2563eb;
+}
+
+/* Subheadings */
+.tt-subheading {
+    font-weight: 700;
+    color: var(--text-primary, #111827);
+    margin-top: 1.15rem;
+    margin-bottom: 0.4rem;
+    font-size: 0.95rem;
+}
+
+.tt-info-item {
+    font-size: 0.92rem;
+    color: var(--text-secondary, #374151);
+    line-height: 1.65;
+}
+
+/* Topic Tags */
+.tt-topic-box {
+    display: inline-block;
+    padding: 5px 12px;
+    border: 1px solid #d9d9d9;
+    background-color: var(--card-bg, #ffffff);
+    color: var(--text-primary, #333333);
+    font-size: 0.85rem;
+    border-radius: 3px;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+
+.tt-topic-box:hover {
+    border-color: #fa8c16;
+    color: #fa8c16;
+}
+
+[data-bs-theme="dark"] .tt-topic-box {
+    background-color: #242526;
+    border-color: #393a3d;
+    color: #e4e6eb;
+}
+
+/* Timetable Table */
+.tt-schedule-table {
+    border-collapse: separate;
+    border-spacing: 8px 8px;
+    width: 100%;
+}
+
+.tt-schedule-table th {
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--text-secondary, #333333);
+    padding: 6px 2px;
+    text-align: center;
+}
+
+.tt-schedule-cell {
+    border: 1px solid #c2c2c2;
+    background-color: var(--card-bg, #ffffff);
+    color: #8c8c8c;
+    border-radius: 2px;
+    padding: 6px 0;
+    font-size: 0.82rem;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.tt-schedule-cell.active {
+    border-color: #fa8c16;
+    background-color: #fa8c16;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(250, 140, 22, 0.25);
+}
+
+[data-bs-theme="dark"] .tt-schedule-cell {
+    background-color: #18191a;
+    border-color: #393a3d;
+    color: #8a8d91;
+}
+
+[data-bs-theme="dark"] .tt-schedule-cell.active {
+    border-color: #fa8c16;
+    background-color: #fa8c16;
+    color: #ffffff;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Top Profile Summary Bar -->
+<div class="bg-white border-bottom py-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8 d-flex align-items-center gap-4">
+                <img src="{{ tutor.avatar_url }}" alt="{{ tutor.full_name }}" class="avatar-img avatar-xl flex-shrink-0 shadow-sm" style="width: 96px; height: 96px; border-radius: 50%; object-fit: cover;">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h1 class="h3 fw-bold mb-0">{{ tutor.full_name }}</h1>
+                        {% if tutor.approval_status == 'approved' %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                <i class="bi bi-shield-fill-check"></i> Đã kiểm duyệt
+                            </span>
+                        {% else %}
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill">
+                                <i class="bi bi-hourglass-split"></i> {{ tutor.get_approval_status_display }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="text-muted small mb-2"><i class="bi bi-geo-alt text-danger me-1"></i> {{ tutor.location }}</div>
+                    {% if tutor.subjects.exists %}
+                        <div class="d-flex flex-wrap gap-1 mb-2">
+                            {% for sub in tutor.subjects.all %}
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1">
+                                    <i class="bi bi-book-half me-1"></i>{{ sub.name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="star-rating">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <span class="fw-bold text-dark ms-1">{{ tutor.get_average_rating }}</span>
+                            <span class="text-muted small">({{ tutor.get_review_count }} đánh giá)</span>
+                        </div>
+                        <span class="text-muted">•</span>
+                        <div class="small text-secondary">
+                            <i class="bi bi-check2-circle text-success me-1"></i> {{ tutor.get_completed_classes_count }} lớp đã hoàn thành
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                <div class="mb-2">
+                    <span class="text-muted small">Mức học phí:</span>
+                    <div class="h3 fw-bold text-primary mb-0">{{ tutor.price_per_hour }} đ<span class="fs-6 text-muted">/giờ</span></div>
+                </div>
+                {% if user.is_authenticated %}
+                    {% if user_profile.is_student %}
+                        <a href="{% url 'study_requests:create_request' tutor.id %}" class="btn btn-primary btn-lg shadow-sm">
+                            <i class="bi bi-send-fill"></i> Gửi Yêu Cầu Học
+                        </a>
+                    {% elif user == tutor.user %}
+                        <a href="{% url 'tutors:edit_tutor_profile' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-pencil-square"></i> Chỉnh sửa hồ sơ của bạn
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-box-arrow-in-right"></i> Đăng nhập để gửi yêu cầu
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Main Content Area: CHUẨN TRUNG TÂM GIA SƯ UY TÍN -->
+        <div class="col-lg-8">
+            <div class="tt-profile-card shadow-sm mb-4">
+                <!-- 1. BANNER: THÔNG TIN GIA SƯ -->
+                <div class="tt-section-banner">
+                    <span class="tt-banner-badge">THÔNG TIN GIA SƯ</span>
+                </div>
+
+                <!-- Thông tin cơ bản -->
+                <div class="tt-subheading">Thông tin cơ bản</div>
+                <div class="tt-info-item mb-3" style="line-height: 1.8;">
+                    <div>Năm sinh: {{ tutor.birth_year|default:"Chưa cập nhật" }}</div>
+                    <div>Giới tính: {{ tutor.gender|default:"Chưa cập nhật" }}</div>
+                    <div>Quê quán: {{ tutor.hometown|default:"Chưa cập nhật" }}</div>
+                    <div>Giọng nói: {{ tutor.voice|default:"Chưa cập nhật" }}</div>
+                    <div>Học vấn: {{ tutor.academic_level|default:"Chưa cập nhật" }}</div>
+                    {% if tutor.graduation_detail %}
+                        <div>{{ tutor.graduation_detail }}</div>
+                    {% elif tutor.education %}
+                        <div>{{ tutor.education }}</div>
+                    {% elif tutor.university %}
+                        <div>{{ tutor.university }}{% if tutor.major %} - Chuyên ngành {{ tutor.major }}{% endif %}</div>
+                    {% endif %}
+                    {% if tutor.workplace %}
+                        <div>{{ tutor.workplace }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Kinh nghiệm gia sư, giảng dạy -->
+                <div class="tt-subheading">Kinh nghiệm gia sư, giảng dạy</div>
+                <p class="tt-info-item mb-3 text-secondary" style="line-height: 1.7; text-align: justify; white-space: pre-line;">
+                    {{ tutor.experience|default:tutor.introduction|default:"Chưa cập nhật thông tin kinh nghiệm giảng dạy." }}
+                </p>
+
+                <!-- Thành tích trong học tập và dạy học -->
+                <div class="tt-subheading">Thành tích trong học tập và dạy học</div>
+                {% with ach_list=tutor.get_achievements_list %}
+                    {% if ach_list %}
+                        <ul class="list-unstyled tt-info-item mb-3 ps-0" style="line-height: 1.75;">
+                            {% for ach in ach_list %}
+                                <li class="mb-1"><span class="me-1">-</span> {{ ach }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted small mb-3">Chưa cập nhật thành tích.</p>
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Môn học sẽ dạy -->
+                <div class="tt-subheading">Môn học sẽ dạy</div>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    {% for sub in tutor.subjects.all %}
+                        <span class="tt-topic-box fw-semibold text-primary" style="border-color: rgba(24, 119, 242, 0.4); background-color: rgba(24, 119, 242, 0.08);">
+                            <i class="bi bi-book-half me-1"></i> {{ sub.name }}
+                        </span>
+                    {% empty %}
+                        <span class="text-muted small">Chưa cập nhật môn học</span>
+                    {% endfor %}
+                </div>
+
+                <!-- Chủ đề dạy -->
+                <div class="tt-subheading">Chủ đề dạy</div>
+                {% with topic_list=tutor.get_topics_list %}
+                    {% if topic_list %}
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            {% for topic in topic_list %}
+                                <span class="tt-topic-box">{{ topic }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted small mb-3">Chưa cập nhật chủ đề dạy.</p>
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Gia sư đang là -->
+                <div class="tt-subheading">Gia sư đang là</div>
+                <div class="mb-3">
+                    <span class="tt-topic-box">{{ tutor.tutor_type|default:"Chưa cập nhật" }}</span>
+                </div>
+
+                <!-- Địa chỉ -->
+                <div class="tt-info-item d-flex flex-wrap align-items-baseline gap-2 mb-4">
+                    <span class="fw-bold text-dark">Địa chỉ:</span>
+                    <span class="ms-2">
+                        {% if tutor.detailed_address or tutor.location %}
+                            {{ tutor.detailed_address|default:tutor.location }}
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ tutor.detailed_address|default:tutor.location|urlencode }}" target="_blank" class="text-decoration-none fw-semibold ms-1" style="color: #fa8c16;">(Xem bản đồ)</a>
+                        {% else %}
+                            Chưa cập nhật
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- 2. BANNER: LỊCH DẠY GIA SƯ -->
+                <div class="tt-section-banner mt-4">
+                    <span class="tt-banner-badge">LỊCH DẠY GIA SƯ</span>
+                </div>
+
+                {% if tutor.has_active_schedule %}
+                    <div class="small text-muted my-2">
+                        Thời gian có thể dạy ( <span class="fw-bold" style="color: #fa8c16;">Màu CAM</span> hiển thị những lịch có thể dạy )
+                    </div>
+
+                    <!-- Ma trận Thời khóa biểu tuần -->
+                    <div class="table-responsive my-3">
+                        <table class="table table-borderless text-center align-middle tt-schedule-table mb-0" style="max-width: 620px; margin: 0 auto; table-layout: fixed;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 14.28%;">Thứ 2</th>
+                                    <th style="width: 14.28%;">Thứ 3</th>
+                                    <th style="width: 14.28%;">Thứ 4</th>
+                                    <th style="width: 14.28%;">Thứ 5</th>
+                                    <th style="width: 14.28%;">Thứ 6</th>
+                                    <th style="width: 14.28%;">Thứ 7</th>
+                                    <th style="width: 14.28%;">Chủ nhật</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in tutor.get_timetable_rows %}
+                                    <tr>
+                                        {% for slot in row.slots %}
+                                            <td class="p-1">
+                                                <div class="tt-schedule-cell {% if slot.is_active %}active{% endif %}">
+                                                    {{ slot.period_name }}
+                                                </div>
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted small my-3">Gia sư chưa cập nhật thời gian có thể dạy.</p>
+                {% endif %}
+            </div>
+
+            <!-- Bằng cấp & Minh chứng xác thực (nếu có) -->
+            {% if tutor.certificates.exists or tutor.certificate_file %}
+                <div class="card card-custom p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-award-fill text-primary me-2"></i> Hồ Sơ Bằng Cấp & Chứng Chỉ Đính Kèm</h5>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill small">
+                            <i class="bi bi-patch-check-fill me-1"></i>Đã xác thực
+                        </span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for cert in tutor.certificates.all %}
+                            {% if cert.is_image %}
+                                <a href="{{ cert.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill">
+                                    <i class="bi bi-file-earmark-image me-1"></i> {{ cert.title|default:"Xem ảnh chứng chỉ" }}
+                                </a>
+                            {% elif cert.is_pdf %}
+                                <a href="{{ cert.file.url }}" target="_blank" class="btn btn-sm btn-outline-danger rounded-pill">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> {{ cert.title|default:"Xem tài liệu PDF" }}
+                                </a>
+                            {% else %}
+                                <a href="{{ cert.file.url }}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill">
+                                    <i class="bi bi-paperclip me-1"></i> {{ cert.title|default:"Tải tệp đính kèm" }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                        {% if tutor.certificate_file and not tutor.certificates.exists %}
+                            <a href="{{ tutor.certificate_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill">
+                                <i class="bi bi-file-earmark-text me-1"></i> Xem tệp minh chứng
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Đánh giá từ học sinh -->
+            <div class="card card-custom p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-chat-heart-fill text-danger me-2"></i> Đánh Giá Từ Học Sinh ({{ reviews.count }})
+                    </h5>
+                    <div class="star-rating">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <span class="fw-bold text-dark ms-1">{{ tutor.get_average_rating }} / 5.0</span>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column gap-3">
+                    {% for rev in reviews %}
+                        <div class="p-3 bg-light rounded-3 border">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="{{ rev.student.profile.get_avatar_url }}" class="avatar-img" style="width: 36px; height: 36px;" alt="{{ rev.student.username }}">
+                                    <div>
+                                        <div class="fw-bold small">{{ rev.student.profile.full_name|default:rev.student.username }}</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">{{ rev.created_at|date:"d/m/Y H:i" }}</div>
+                                    </div>
+                                </div>
+                                <div class="star-rating small">
+                                    {% for i in rev.star_range %}
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                    {% endfor %}
+                                    {% for i in rev.empty_star_range %}
+                                        <i class="bi bi-star text-muted"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <p class="text-secondary small mb-0">{{ rev.comment }}</p>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted text-center py-3 mb-0">
+                            <i class="bi bi-chat-square-text fs-3 d-block mb-1"></i>
+                            Gia sư này chưa có đánh giá nào. Hãy là người đầu tiên học và để lại cảm nhận!
+                        </p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-lg-4">
+            <div class="card card-custom p-4 sticky-top" style="top: 85px; z-index: 10;">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">Thông Tin Nhanh</h5>
+                
+                <div class="d-flex flex-column gap-3 mb-4 text-secondary small">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted"><i class="bi bi-cash me-1"></i> Học phí cơ bản:</span>
+                        <strong class="text-primary">{{ tutor.price_per_hour }} đ / giờ</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted"><i class="bi bi-book-half me-1"></i> Môn học sẽ dạy:</span>
+                        <div class="text-end fw-semibold text-primary">
+                            {% for sub in tutor.subjects.all %}
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">{{ sub.name }}</span>
+                            {% empty %}
+                                <span class="text-muted">Chưa cập nhật</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted"><i class="bi bi-laptop me-1"></i> Hình thức dạy:</span>
+                        <strong>{{ tutor.get_teaching_method_display }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted"><i class="bi bi-geo-alt me-1"></i> Khu vực phục vụ:</span>
+                        <strong>{{ tutor.location }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted"><i class="bi bi-shield-check me-1"></i> Trạng thái hồ sơ:</span>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">Chính thức</span>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-light rounded-3 mb-4 border">
+                    <h6 class="fw-bold text-dark small mb-2"><i class="bi bi-patch-check-fill text-primary"></i> Cam kết từ TutorLink</h6>
+                    <ul class="list-unstyled small text-muted mb-0 d-flex flex-column gap-1">
+                        <li>✓ Hồ sơ & bằng cấp được admin xác thực</li>
+                        <li>✓ Học thử buổi đầu tiện lợi</li>
+                        <li>✓ Đổi gia sư linh hoạt nếu không hợp</li>
+                    </ul>
+                </div>
+
+                {% if user.is_authenticated and user_profile.is_student %}
+                    <div class="d-grid">
+                        <a href="{% url 'study_requests:create_request' tutor.id %}" class="btn btn-primary btn-lg fw-bold">
+                            <i class="bi bi-send-fill"></i> Gửi Yêu Cầu Học
+                        </a>
+                    </div>
+                {% elif not user.is_authenticated %}
+                    <div class="d-grid">
+                        <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-lg fw-bold">
+                            <i class="bi bi-box-arrow-in-right"></i> Đăng nhập gửi yêu cầu
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Danh sách Lớp Đang Cần Gia Sư – TutorLink{% endblock %}
+
+{% block content %}
+<div class="bg-white border-bottom py-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h3 fw-bold mb-1">Lớp Học Đang Cần Gia Sư</h1>
+                <p class="text-muted small mb-0">Các bài đăng tìm gia sư trực tiếp từ học sinh và phụ huynh. Gia sư có thể ứng tuyển ngay!</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <a href="{% url 'class_requests:post_class' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle-fill"></i> Đăng tin tìm gia sư mới
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- Filters Sidebar -->
+        <div class="col-lg-3">
+            <div class="card card-custom p-4 sticky-top" style="top: 85px; z-index: 10;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-funnel text-primary"></i> Bộ Lọc Lớp</h5>
+                    <a href="{% url 'class_requests:class_list' %}" class="text-muted small text-decoration-none">Đặt lại</a>
+                </div>
+
+                <form method="get" action="{% url 'class_requests:class_list' %}">
+                    <div class="mb-3">
+                        <label class="form-label small">Từ khóa</label>
+                        <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm" placeholder="Môn học, tiêu đề...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small">Môn học</label>
+                        <select name="subject" class="form-select form-select-sm">
+                            <option value="">-- Tất cả môn học --</option>
+                            {% for group in subject_groups %}
+                                <optgroup label="{{ group.name }}">
+                                    {% for sub in group.subjects %}
+                                        <option value="{{ sub.id }}" {% if selected_subject == sub.id|stringformat:"i" %}selected{% endif %}>
+                                            {{ sub.name }}
+                                        </option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small">Khối lớp / Trình độ</label>
+                        <input type="text" name="grade" value="{{ grade }}" class="form-control form-control-sm" placeholder="VD: Lớp 10, Lớp 12...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small">Tỉnh / Thành phố</label>
+                        <select name="location" id="id_location_classes" class="form-select form-select-sm">
+                            <option value="">-- Tất cả tỉnh / thành --</option>
+                            <option value="Online" {% if location == 'Online' %}selected{% endif %}>🌐 Học Online (Toàn quốc)</option>
+                            <optgroup label="Thành phố lớn">
+                                {% for city in popular_cities %}
+                                    <option value="{{ city }}" {% if location == city %}selected{% endif %}>{{ city }}</option>
+                                {% endfor %}
+                            </optgroup>
+                            <optgroup label="Tất cả tỉnh thành">
+                                {% for prov in vietnam_provinces %}
+                                    {% if prov not in popular_cities %}
+                                        <option value="{{ prov }}" {% if location == prov %}selected{% endif %}>{{ prov }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small">Phường / Xã</label>
+                        <select name="district" id="id_district_classes" class="form-select form-select-sm">
+                            <option value="">-- Tất cả phường / xã --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small">Hình thức học</label>
+                        <select name="method" class="form-select form-select-sm">
+                            <option value="">-- Tất cả hình thức --</option>
+                            <option value="online" {% if selected_method == 'online' %}selected{% endif %}>Trực tuyến (Online)</option>
+                            <option value="offline" {% if selected_method == 'offline' %}selected{% endif %}>Trực tiếp (Offline)</option>
+                            <option value="both" {% if selected_method == 'both' %}selected{% endif %}>Linh hoạt</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-secondary btn-sm fw-bold">
+                            <i class="bi bi-filter"></i> Lọc Lớp Học
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Class Requests List -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted small">Tìm thấy <strong>{{ total_results }}</strong> yêu cầu tìm gia sư</span>
+            </div>
+
+            <div class="row g-4">
+                {% for cr in class_requests %}
+                    <div class="col-md-6">
+                        <div class="card card-custom h-100 p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                                <div class="d-flex gap-1 flex-wrap">
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1">
+                                        {{ cr.subject.name }} • {{ cr.grade }}
+                                    </span>
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2.5 py-1 fw-semibold">
+                                        <i class="bi bi-calendar-check me-1"></i>{{ cr.sessions_per_week|default:"2-3 buổi/tuần" }}
+                                    </span>
+                                </div>
+                                <span class="badge badge-status status-pending">
+                                    <i class="bi bi-clock-history"></i> {{ cr.get_status_display }}
+                                </span>
+                            </div>
+
+                            <h5 class="fw-bold my-2">
+                                <a href="{% url 'class_requests:class_detail' cr.id %}" class="text-decoration-none text-dark">
+                                    {{ cr.title }}
+                                </a>
+                            </h5>
+
+                            <p class="text-muted small mb-3">
+                                {{ cr.description|truncatechars:95 }}
+                            </p>
+
+                            <div class="small d-flex flex-column gap-1 mb-3 text-secondary">
+                                <div><i class="bi bi-geo-alt text-danger me-1"></i> <strong>Khu vực:</strong> {{ cr.location }}</div>
+                                <div><i class="bi bi-calendar-check text-warning-emphasis me-1"></i> <strong>Số buổi:</strong> <span class="fw-semibold text-dark">{{ cr.sessions_per_week|default:"2-3 buổi/tuần" }}</span></div>
+                                <div><i class="bi bi-clock text-primary me-1"></i> <strong>Thời gian có thể học:</strong> {{ cr.schedule }}</div>
+                                <div><i class="bi bi-laptop text-info me-1"></i> <strong>Hình thức:</strong> {{ cr.get_teaching_method_display }}</div>
+                                <div><i class="bi bi-people text-secondary me-1"></i> <strong>Đã có:</strong> {{ cr.applications_count }} gia sư ứng tuyển</div>
+                            </div>
+
+                            <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted d-block">Mức chi trả</small>
+                                    <div class="fw-bold text-danger fs-5">{{ cr.budget }} đ<small class="text-muted fs-6">/{{ cr.get_budget_type_display }}</small></div>
+                                </div>
+                                <a href="{% url 'class_requests:class_detail' cr.id %}" class="btn btn-secondary btn-sm">
+                                    Xem chi tiết & Ứng tuyển
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <div class="card card-custom text-center py-5">
+                            <i class="bi bi-inbox fs-1 text-muted mb-2"></i>
+                            <h5 class="fw-bold">Hiện chưa có lớp học phù hợp</h5>
+                            <p class="text-muted small">Hãy thử tìm kiếm với từ khóa khác hoặc quay lại sau.</p>
+                            <div>
+                                <a href="{% url 'class_requests:post_class' %}" class="btn btn-primary btn-sm">
+                                    Đăng tin tìm gia sư
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initLocationCascade(
+        document.getElementById('id_location_classes'),
+        document.getElementById('id_district_classes'),
+        "{{ district|escapejs }}"
+    );
+});
+</script>
+{% endblock %}

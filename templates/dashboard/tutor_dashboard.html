@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Gia sư – TutorLink{% endblock %}
+
+{% block content %}
+<div class="bg-white border-bottom py-4">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <img src="{{ tutor_profile.avatar_url }}" alt="avatar" class="avatar-img avatar-lg">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h1 class="h3 fw-bold mb-0">Dashboard Gia Sư</h1>
+                        <span class="badge badge-status {% if tutor_profile.approval_status == 'approved' %}status-approved{% elif tutor_profile.approval_status == 'rejected' %}status-rejected{% else %}status-pending{% endif %}">
+                            {{ tutor_profile.get_approval_status_display }}
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-0">Xin chào, thầy/cô <strong>{{ tutor_profile.full_name }}</strong></p>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'class_requests:class_list' %}" class="btn btn-secondary">
+                    <i class="bi bi-search"></i> Tìm lớp nhận dạy
+                </a>
+                <a href="{% url 'tutors:edit_tutor_profile' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil-square"></i> Cập nhật hồ sơ
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    {% if not tutor_profile.is_profile_completed %}
+        <div class="alert alert-warning border-0 shadow-sm rounded-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 p-3 mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-person-exclamation fs-2 text-warning flex-shrink-0"></i>
+                <div>
+                    <h6 class="fw-bold mb-1 text-dark">Hồ sơ gia sư của bạn chưa hoàn thiện</h6>
+                    <div class="small text-muted">Vui lòng cập nhật đầy đủ thông tin cá nhân, môn dạy và học vấn để Ban Quản Trị phê duyệt kích hoạt quyền ứng tuyển nhận lớp.</div>
+                </div>
+            </div>
+            <a href="{% url 'tutors:edit_tutor_profile' %}" class="btn btn-warning btn-sm fw-bold px-3 text-nowrap">
+                <i class="bi bi-pencil-square me-1"></i> Cập nhật hồ sơ ngay
+            </a>
+        </div>
+    {% elif tutor_profile.approval_status == 'pending' %}
+        <div class="alert alert-info border-0 shadow-sm rounded-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 p-3 mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-clock-history fs-2 text-info flex-shrink-0"></i>
+                <div>
+                    <h6 class="fw-bold mb-1 text-dark">Hồ sơ đang chờ Ban Quản Trị phê duyệt</h6>
+                    <div class="small text-muted">Hồ sơ của bạn đã hoàn tất và đang được Admin xét duyệt. Bạn sẽ có thể ứng tuyển nhận lớp ngay khi được phê duyệt thành công.</div>
+                </div>
+            </div>
+            <a href="{% url 'tutors:edit_tutor_profile' %}" class="btn btn-outline-info btn-sm px-3 text-nowrap">
+                <i class="bi bi-eye me-1"></i> Xem lại hồ sơ
+            </a>
+        </div>
+    {% elif tutor_profile.approval_status == 'rejected' %}
+        <div class="alert alert-danger border-0 shadow-sm rounded-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 p-3 mb-4">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-x-circle fs-2 text-danger flex-shrink-0"></i>
+                <div>
+                    <h6 class="fw-bold mb-1 text-danger">Hồ sơ chưa được phê duyệt</h6>
+                    <div class="small text-muted">Vui lòng cập nhật lại thông tin hồ sơ theo phản hồi từ Admin để được xét duyệt lại.</div>
+                </div>
+            </div>
+            <a href="{% url 'tutors:edit_tutor_profile' %}" class="btn btn-danger btn-sm px-3 text-nowrap">
+                <i class="bi bi-pencil-square me-1"></i> Cập nhật lại
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Stat Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-6 col-lg-3">
+            <div class="stat-card shadow-sm">
+                <div>
+                    <div class="text-muted small fw-medium">Yêu cầu học đến</div>
+                    <div class="h2 fw-bold text-danger mt-1 mb-0">{{ pending_requests_count }}</div>
+                </div>
+                <div class="stat-icon bg-danger-subtle text-danger">
+                    <i class="bi bi-envelope"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-card shadow-sm">
+                <div>
+                    <div class="text-muted small fw-medium">Lớp đang dạy</div>
+                    <div class="h2 fw-bold text-primary mt-1 mb-0">{{ active_classes_count }}</div>
+                </div>
+                <div class="stat-icon bg-primary-subtle text-primary">
+                    <i class="bi bi-book-half"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-card shadow-sm">
+                <div>
+                    <div class="text-muted small fw-medium">Đã hoàn thành</div>
+                    <div class="h2 fw-bold text-success mt-1 mb-0">{{ completed_classes_count }}</div>
+                </div>
+                <div class="stat-icon bg-success-subtle text-success">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-card shadow-sm">
+                <div>
+                    <div class="text-muted small fw-medium">Đánh giá trung bình</div>
+                    <div class="h2 fw-bold text-warning mt-1 mb-0">{{ avg_rating }} <small class="fs-6 text-muted">/5.0</small></div>
+                </div>
+                <div class="stat-icon bg-warning-subtle text-warning">
+                    <i class="bi bi-star-fill"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Yêu cầu học chờ xử lý -->
+        <div class="col-lg-6">
+            <div class="card card-custom p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-inbox-fill text-danger me-2"></i> Yêu Cầu Học Đang Chờ</h5>
+                    <a href="{% url 'study_requests:tutor_requests' %}" class="small text-primary text-decoration-none">Xem tất cả</a>
+                </div>
+                <div class="d-flex flex-column gap-3">
+                    {% for req in incoming_requests %}
+                        <div class="p-3 bg-light rounded-3 border d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold text-dark">{{ req.student.profile.full_name|default:req.student.username }}</div>
+                                <div class="text-muted small">{{ req.subject.name }} • {{ req.schedule }}</div>
+                            </div>
+                            <a href="{% url 'study_requests:tutor_requests' %}" class="btn btn-primary btn-sm">
+                                Phản hồi
+                            </a>
+                        </div>
+                    {% empty %}
+                        <div class="text-muted text-center py-4 small">Chưa có yêu cầu học trực tiếp nào đang chờ.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Lớp đang dạy -->
+        <div class="col-lg-6">
+            <div class="card card-custom p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-mortarboard-fill text-primary me-2"></i> Lớp Học Đang Diễn Ra</h5>
+                    <a href="{% url 'matched_classes:tutor_classes' %}" class="small text-primary text-decoration-none">Xem tất cả</a>
+                </div>
+                <div class="d-flex flex-column gap-3">
+                    {% for c in active_classes %}
+                        <div class="p-3 bg-light rounded-3 border d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold text-dark">{{ c.subject.name }}</div>
+                                <div class="text-muted small">Học sinh: {{ c.student.profile.full_name|default:c.student.username }} • SĐT: {{ c.student.profile.phone|default:"N/A" }}</div>
+                            </div>
+                            <a href="{% url 'matched_classes:class_detail' c.id %}" class="btn btn-outline-primary btn-sm">
+                                Quản lý
+                            </a>
+                        </div>
+                    {% empty %}
+                        <div class="text-muted text-center py-4 small">Hiện chưa có lớp học nào đang diễn ra.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

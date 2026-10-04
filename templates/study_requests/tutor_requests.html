@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Yêu Cầu Học Trực Tiếp Đến – TutorLink{% endblock %}
+
+{% block content %}
+<div class="bg-white border-bottom py-4">
+    <div class="container">
+        <h1 class="h3 fw-bold mb-1">Yêu Cầu Học Đến</h1>
+        <p class="text-muted small mb-0">Học sinh gửi yêu cầu học trực tiếp đến hồ sơ gia sư của bạn</p>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-4">
+        {% for req in requests_list %}
+            <div class="col-lg-6">
+                <div class="card card-custom p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="{{ req.student.profile.get_avatar_url }}" alt="student" class="avatar-img avatar-lg">
+                            <div>
+                                <h5 class="fw-bold mb-0">{{ req.student.profile.full_name|default:req.student.username }}</h5>
+                                <div class="text-muted small"><i class="bi bi-telephone text-primary"></i> {{ req.student.profile.phone|default:"Chưa có số điện thoại" }}</div>
+                            </div>
+                        </div>
+                        <span class="badge badge-status {% if req.status == 'accepted' %}status-accepted{% elif req.status == 'rejected' %}status-rejected{% else %}status-pending{% endif %}">
+                            {{ req.get_status_display }}
+                        </span>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-3 border small">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <span class="text-muted">Môn học:</span>
+                                <strong class="d-block text-primary">{{ req.subject.name }}</strong>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-muted">Khối lớp:</span>
+                                <strong class="d-block">{{ req.grade }}</strong>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-muted">Hình thức:</span>
+                                <strong class="d-block">{{ req.get_teaching_method_display }}</strong>
+                            </div>
+                            <div class="col-6">
+                                <span class="text-muted">Số buổi / tuần:</span>
+                                <strong class="d-block text-primary">{{ req.sessions_per_week|default:"2-3 buổi/tuần" }}</strong>
+                            </div>
+                            <div class="col-12">
+                                <span class="text-muted">Thời gian có thể học:</span>
+                                <strong class="d-block text-dark">{{ req.schedule }}</strong>
+                            </div>
+                            {% if req.location %}
+                            <div class="col-12 pt-2 border-top">
+                                <span class="text-muted"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Địa chỉ học:</span>
+                                <strong class="d-block text-dark">{{ req.location }}</strong>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="text-muted small d-block mb-1">Lời nhắn / Ghi chú từ học sinh:</span>
+                        <p class="text-secondary small mb-0 p-2 bg-white rounded border">
+                            {{ req.note|default:"Học sinh không để lại ghi chú thêm." }}
+                        </p>
+                    </div>
+
+                    <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="bi bi-clock"></i> {{ req.created_at|date:"d/m/Y H:i" }}</small>
+                        
+                        {% if req.status == 'pending' %}
+                            <div class="d-flex gap-2">
+                                <form method="post" action="{% url 'study_requests:accept_request' req.id %}" onsubmit="return confirmAction('Bạn đồng ý nhận lớp học này?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="bi bi-check-circle"></i> Đồng ý nhận dạy
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'study_requests:reject_request' req.id %}" onsubmit="return confirmAction('Bạn muốn từ chối yêu cầu này?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-x-circle"></i> Từ chối
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="card card-custom text-center py-5">
+                    <i class="bi bi-envelope-open fs-1 text-muted mb-2"></i>
+                    <h5 class="fw-bold">Bạn chưa có yêu cầu học nào</h5>
+                    <p class="text-muted small">Hãy cập nhật hồ sơ chi tiết và tham gia ứng tuyển các lớp đang cần gia sư để kết nối học sinh nhanh hơn!</p>
+                    <div>
+                        <a href="{% url 'class_requests:class_list' %}" class="btn btn-secondary btn-sm">Xem lớp cần gia sư</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

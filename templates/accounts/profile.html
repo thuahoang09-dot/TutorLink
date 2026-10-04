@@ -1,0 +1,957 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Hồ sơ cá nhân – {{ profile.full_name|default:user.username }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ==========================================================================
+   FACEBOOK AVATAR PICKER & CROPPER STYLES
+   ========================================================================== */
+
+/* 1. Facebook Avatar Wrapper on Profile Card */
+.fb-avatar-container {
+    width: 130px;
+    height: 130px;
+    position: relative;
+    margin: 0 auto;
+}
+
+.fb-avatar-ring {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    border: 3px solid #1877F2;
+    box-shadow: 0 4px 14px rgba(24, 119, 242, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fb-avatar-ring:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(24, 119, 242, 0.35);
+}
+
+.fb-avatar-ring .fb-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Facebook Dark Hover Overlay on Avatar */
+.fb-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.fb-avatar-ring:hover .fb-avatar-overlay {
+    opacity: 1;
+}
+
+.fb-avatar-overlay i {
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.fb-avatar-overlay-text {
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Facebook Camera Badge Button */
+.fb-camera-btn {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: #E4E6EB;
+    color: #050505;
+    border: 3px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s ease;
+    z-index: 5;
+    padding: 0;
+}
+
+.fb-camera-btn:hover {
+    background-color: #D8DADF;
+    transform: scale(1.1);
+}
+
+/* Dark Mode Overrides for Facebook Avatar */
+[data-bs-theme="dark"] .fb-avatar-ring {
+    border-color: #2D88FF;
+    box-shadow: 0 4px 14px rgba(45, 136, 255, 0.2);
+}
+
+[data-bs-theme="dark"] .fb-camera-btn {
+    background-color: #3A3B3C;
+    color: #E4E6EB;
+    border-color: #242526;
+}
+
+[data-bs-theme="dark"] .fb-camera-btn:hover {
+    background-color: #4E4F50;
+}
+
+/* 2. Facebook Modal Customization */
+.fb-modal-content {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.fb-modal-header {
+    background-color: var(--bs-body-bg);
+}
+
+.fb-modal-close-btn {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background-color: #E4E6EB;
+    color: #606770;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.fb-modal-close-btn:hover {
+    background-color: #D8DADF;
+    color: #1c1e21;
+}
+
+[data-bs-theme="dark"] .fb-modal-close-btn {
+    background-color: #3A3B3C;
+    color: #B0B3B8;
+}
+
+[data-bs-theme="dark"] .fb-modal-close-btn:hover {
+    background-color: #4E4F50;
+    color: #E4E6EB;
+}
+
+/* Upload Dropzone (Step 1) */
+.fb-upload-dropzone {
+    border: 2px dashed #CCD0D5;
+    border-radius: 14px;
+    background-color: #F0F2F5;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.fb-upload-dropzone:hover, .fb-upload-dropzone.dragover {
+    border-color: #1877F2;
+    background-color: rgba(24, 119, 242, 0.06);
+}
+
+[data-bs-theme="dark"] .fb-upload-dropzone {
+    border-color: #393A3D;
+    background-color: #18191A;
+}
+
+[data-bs-theme="dark"] .fb-upload-dropzone:hover, [data-bs-theme="dark"] .fb-upload-dropzone.dragover {
+    border-color: #2D88FF;
+    background-color: rgba(45, 136, 255, 0.1);
+}
+
+.fb-upload-icon-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background-color: rgba(24, 119, 242, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Cropper Viewport (Step 2) */
+.fb-crop-viewport {
+    width: 100%;
+    max-width: 460px;
+    height: 350px;
+    background-color: #0b0c0d;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    user-select: none;
+    touch-action: none;
+    cursor: grab;
+    margin: 0 auto;
+}
+
+.fb-crop-viewport.is-dragging {
+    cursor: grabbing;
+}
+
+.fb-crop-stage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+#fb-crop-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-width: none;
+    max-height: none;
+    transform-origin: center center;
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
+}
+
+/* The Facebook Circular Mask Overlay */
+.fb-circular-mask {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.fb-circle-guide {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 260px;
+    height: 260px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65);
+    pointer-events: none;
+}
+
+/* Subtle crosshair watermark inside circle */
+.fb-circle-guide::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px dashed rgba(255, 255, 255, 0.35);
+    pointer-events: none;
+}
+
+/* Facebook Zoom Control Bar */
+.fb-zoom-bar {
+    background-color: #F0F2F5;
+    border: 1px solid #E4E6EB;
+    border-radius: 10px;
+    user-select: none;
+}
+
+[data-bs-theme="dark"] .fb-zoom-bar {
+    background-color: #18191A;
+    border-color: #393A3D;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    padding: 4px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-secondary-color);
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.btn-icon:hover {
+    color: #1877F2;
+    transform: scale(1.1);
+}
+
+/* Facebook button blue */
+.btn-fb-primary {
+    background-color: #1877F2;
+    border-color: #1877F2;
+    color: #ffffff;
+}
+.btn-fb-primary:hover, .btn-fb-primary:focus {
+    background-color: #166FE5;
+    border-color: #166FE5;
+    color: #ffffff;
+}
+
+/* Card picker widget on the form */
+.fb-avatar-picker-widget {
+    background: var(--card-bg, #ffffff);
+    border: 1px solid var(--border-color, #e5e7eb);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fb-avatar-picker-widget:hover {
+    border-color: #1877F2;
+    box-shadow: 0 2px 10px rgba(24, 119, 242, 0.08);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Success Alert Banner (for instant real-time feedback) -->
+    <div id="avatar-toast-alert" class="alert alert-success alert-dismissible fade d-none mb-4 shadow-sm rounded-3" role="alert">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-check-circle-fill fs-5 text-success"></i>
+            <span id="avatar-toast-message">Cập nhật ảnh đại diện thành công!</span>
+        </div>
+        <button type="button" class="btn-close" onclick="this.parentElement.classList.add('d-none')"></button>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar Profile Card -->
+        <div class="col-lg-4">
+            <div class="card card-custom p-4 text-center">
+                <!-- Facebook-Style Avatar Container with Camera Button -->
+                <div class="fb-avatar-container mb-3">
+                    <div class="fb-avatar-ring" onclick="openAvatarModal()" role="button" title="Nhấp để thay đổi ảnh đại diện">
+                        <img id="profile-avatar-img" src="{{ profile.get_avatar_url }}" alt="{{ profile.full_name }}" class="fb-avatar-img">
+                        <div class="fb-avatar-overlay">
+                            <i class="bi bi-camera-fill"></i>
+                            <span class="fb-avatar-overlay-text">Cập nhật</span>
+                        </div>
+                    </div>
+                    <button type="button" class="fb-camera-btn" onclick="openAvatarModal()" title="Cập nhật ảnh đại diện" aria-label="Cập nhật ảnh đại diện">
+                        <i class="bi bi-camera-fill"></i>
+                    </button>
+                </div>
+
+                <h4 class="fw-bold mb-1">{{ profile.full_name|default:user.username }}</h4>
+                <p class="text-muted small mb-2">@{{ user.username }}</p>
+                <div>
+                    <span class="badge badge-role {% if profile.is_student %}badge-student{% elif profile.is_tutor %}badge-tutor{% else %}badge-admin{% endif %} fs-6 px-3 py-1">
+                        {{ profile.get_role_display }}
+                    </span>
+                </div>
+
+                <div class="mt-2">
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 mt-1" onclick="openAvatarModal()">
+                        <i class="bi bi-camera me-1"></i> Đổi ảnh đại diện
+                    </button>
+                </div>
+
+                <hr class="my-3">
+
+                <div class="text-start small d-flex flex-column gap-2 text-secondary">
+                    <div><i class="bi bi-envelope me-2 text-primary"></i> {{ user.email|default:"Chưa cập nhật" }}</div>
+                    <div><i class="bi bi-telephone me-2 text-primary"></i> {{ profile.phone|default:"Chưa cập nhật" }}</div>
+                    <div><i class="bi bi-geo-alt me-2 text-primary"></i> {{ profile.address|default:"Chưa cập nhật" }}</div>
+                    <div><i class="bi bi-calendar3 me-2 text-primary"></i> Tham gia: {{ user.date_joined|date:"d/m/Y" }}</div>
+                </div>
+
+                {% if profile.is_tutor %}
+                    <div class="mt-4 pt-3 border-top d-grid gap-2">
+                        <a href="{% url 'tutors:edit_tutor_profile' %}" class="btn btn-secondary">
+                            <i class="bi bi-mortarboard"></i> Chỉnh sửa hồ sơ gia sư
+                        </a>
+                        <a href="{% url 'tutors:tutor_detail' profile.user.tutor_profile.id %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye"></i> Xem trang công khai
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Edit Form Card -->
+        <div class="col-lg-8">
+            <div class="card card-custom p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                    <div>
+                        <h4 class="fw-bold mb-1">Cập Nhật Thông Tin Cá Nhân</h4>
+                        <p class="text-muted small mb-0">Quản lý và chỉnh sửa thông tin tài khoản của bạn</p>
+                    </div>
+                </div>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Tên đăng nhập (Cố định)</label>
+                            <input type="text" class="form-control bg-light" value="{{ user.username }}" disabled>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Họ và tên</label>
+                            {{ form.full_name }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Số điện thoại</label>
+                            {{ form.phone }}
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Địa chỉ</label>
+                            {{ form.address }}
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Giới thiệu ngắn (Bio)</label>
+                            {{ form.bio }}
+                        </div>
+
+                        <!-- Facebook-Style Avatar Widget in the Form -->
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Ảnh đại diện</label>
+                            <div class="fb-avatar-picker-widget p-3 rounded-3 d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img id="form-avatar-preview" src="{{ profile.get_avatar_url }}" alt="avatar" class="avatar-img shadow-sm" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover;">
+                                    <div>
+                                        <div class="fw-bold d-flex align-items-center gap-1.5 text-primary">
+                                            <i class="bi bi-camera-fill"></i> Thay đổi ảnh phong cách Facebook
+                                        </div>
+                                        <div class="text-muted small">Cắt khung tròn, kéo điều chỉnh vị trí và phóng to thu nhỏ trực quan</div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-outline-primary fw-semibold rounded-pill px-3 py-1.5 flex-shrink-0" onclick="openAvatarModal()">
+                                    <i class="bi bi-camera-fill me-1"></i> Cập nhật ảnh
+                                </button>
+                            </div>
+                            <!-- Hidden input if fallback is needed -->
+                            <div class="d-none">
+                                {{ form.avatar }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top text-end">
+                        <button type="submit" class="btn btn-primary px-4 fw-bold">
+                            <i class="bi bi-check-lg"></i> Lưu Thông Tin Cá Nhân
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================================================
+     MODAL CẬP NHẬT ẢNH ĐẠI DIỆN CHUẨN FACEBOOK
+     ========================================================================== -->
+<div class="modal fade" id="fbAvatarModal" tabindex="-1" aria-labelledby="fbAvatarModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 560px;">
+        <div class="modal-content fb-modal-content border-0 shadow-lg">
+            <!-- Modal Header chuẩn Facebook -->
+            <div class="modal-header fb-modal-header border-bottom py-3 px-4 position-relative">
+                <h5 class="modal-title fw-bold w-100 text-center m-0" id="fbAvatarModalLabel">Cập nhật ảnh đại diện</h5>
+                <button type="button" class="fb-modal-close-btn" data-bs-dismiss="modal" aria-label="Đóng">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body p-4">
+                <!-- STEP 1: Chọn ảnh / Kéo thả ảnh -->
+                <div id="fb-step-select" class="text-center py-2">
+                    <div class="fb-upload-dropzone p-4 p-md-5 mb-3" id="fb-dropzone" onclick="document.getElementById('fb-file-input').click()">
+                        <div class="fb-upload-icon-circle mx-auto mb-3">
+                            <i class="bi bi-cloud-arrow-up-fill fs-1 text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">Tải ảnh lên</h5>
+                        <p class="text-muted small mb-3">Kéo và thả ảnh vào đây, hoặc nhấn để chọn file</p>
+                        <input type="file" id="fb-file-input" accept="image/png, image/jpeg, image/jpg, image/webp" class="d-none">
+                        <button type="button" class="btn btn-primary px-4 py-2 fw-semibold rounded-pill pointer-events-none">
+                            <i class="bi bi-plus-lg me-1"></i> Chọn ảnh từ thiết bị
+                        </button>
+                    </div>
+
+                    {% if profile.avatar %}
+                    <div class="pt-2 border-top">
+                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" id="btn-delete-avatar" onclick="deleteCurrentAvatar()">
+                            <i class="bi bi-trash3 me-1"></i> Gỡ ảnh hiện tại (dùng ảnh mặc định)
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- STEP 2: Trình cắt ảnh Facebook (Interactive Cropper & Zoom) -->
+                <div id="fb-step-crop" class="d-none">
+                    <!-- Instruction hint -->
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small text-muted"><i class="bi bi-arrows-move me-1"></i>Nhấp giữ và kéo ảnh để căn chỉnh vị trí</span>
+                        <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 text-primary fw-semibold" onclick="resetToStepSelect()">
+                            <i class="bi bi-arrow-repeat me-1"></i>Chọn ảnh khác
+                        </button>
+                    </div>
+
+                    <!-- Cropper Viewport -->
+                    <div class="fb-crop-viewport position-relative" id="fb-crop-viewport">
+                        <div class="fb-crop-stage">
+                            <img id="fb-crop-image" src="" alt="Avatar Preview" draggable="false">
+                        </div>
+                        <!-- Facebook Circular Mask -->
+                        <div class="fb-circular-mask">
+                            <div class="fb-circle-guide"></div>
+                        </div>
+                    </div>
+
+                    <!-- Facebook Zoom Slider Bar -->
+                    <div class="fb-zoom-bar mt-3 px-3 py-2 d-flex align-items-center justify-content-center gap-2">
+                        <button type="button" class="btn-icon" id="btn-zoom-out" title="Thu nhỏ">
+                            <i class="bi bi-dash-circle fs-5"></i>
+                        </button>
+                        <input type="range" class="form-range flex-grow-1" id="fb-zoom-range" min="1" max="3" step="0.01" value="1" style="max-width: 280px;">
+                        <button type="button" class="btn-icon" id="btn-zoom-in" title="Phóng to">
+                            <i class="bi bi-plus-circle fs-5"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5 ms-2" id="btn-rotate" title="Xoay ảnh 90°">
+                            <i class="bi bi-arrow-clockwise"></i> Xoay
+                        </button>
+                    </div>
+
+                    <div id="fb-modal-alert" class="alert alert-danger d-none mt-3 py-2 small" role="alert"></div>
+                </div>
+            </div>
+
+            <!-- Modal Footer chuẩn Facebook -->
+            <div class="modal-footer fb-modal-footer border-top py-2.5 px-4 justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary px-4 fw-semibold rounded-3" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-fb-primary px-4 fw-bold rounded-3" id="btn-save-avatar" disabled onclick="saveCroppedAvatar()">
+                    <span id="btn-save-text"><i class="bi bi-check-lg me-1"></i> Lưu</span>
+                    <span id="btn-save-spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    let avatarModal = null;
+    const fileInput = document.getElementById('fb-file-input');
+    const dropzone = document.getElementById('fb-dropzone');
+    const stepSelect = document.getElementById('fb-step-select');
+    const stepCrop = document.getElementById('fb-step-crop');
+    const cropViewport = document.getElementById('fb-crop-viewport');
+    const cropImage = document.getElementById('fb-crop-image');
+    const zoomRange = document.getElementById('fb-zoom-range');
+    const btnZoomOut = document.getElementById('btn-zoom-out');
+    const btnZoomIn = document.getElementById('btn-zoom-in');
+    const btnRotate = document.getElementById('btn-rotate');
+    const btnSave = document.getElementById('btn-save-avatar');
+    const btnSaveText = document.getElementById('btn-save-text');
+    const btnSaveSpinner = document.getElementById('btn-save-spinner');
+    const modalAlert = document.getElementById('fb-modal-alert');
+
+    // Cropper State Variables
+    let naturalWidth = 0;
+    let naturalHeight = 0;
+    let baseScale = 1;
+    let currentZoom = 1;
+    let scale = 1;
+    let rotation = 0; // 0, 90, 180, 270
+    let offsetX = 0;
+    let offsetY = 0;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let imageStartX = 0;
+    let imageStartY = 0;
+
+    const CIRCLE_DIAMETER = 260; // Diameter of circular crop guide in pixels
+
+    // Initialize Modal
+    window.openAvatarModal = function() {
+        const modalEl = document.getElementById('fbAvatarModal');
+        if (!avatarModal) {
+            avatarModal = new bootstrap.Modal(modalEl);
+        }
+        resetToStepSelect();
+        avatarModal.show();
+    };
+
+    window.resetToStepSelect = function() {
+        stepSelect.classList.remove('d-none');
+        stepCrop.classList.add('d-none');
+        btnSave.disabled = true;
+        fileInput.value = '';
+        hideAlert();
+    };
+
+    function showAlert(msg) {
+        modalAlert.textContent = msg;
+        modalAlert.classList.remove('d-none');
+    }
+
+    function hideAlert() {
+        modalAlert.textContent = '';
+        modalAlert.classList.add('d-none');
+    }
+
+    // Drag & Drop handlers for dropzone
+    if (dropzone) {
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.add('dragover');
+            });
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove('dragover');
+            });
+        });
+        dropzone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+    }
+
+    fileInput.addEventListener('change', function(e) {
+        if (this.files && this.files.length > 0) {
+            handleFile(this.files[0]);
+        }
+    });
+
+    function handleFile(file) {
+        if (!file.type.startsWith('image/')) {
+            alert('Vui lòng chọn một tệp hình ảnh hợp lệ (JPG, PNG, WebP).');
+            return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            alert('Dung lượng ảnh tối đa là 10MB.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            cropImage.src = e.target.result;
+            cropImage.onload = function() {
+                initCropper();
+            };
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function initCropper() {
+        hideAlert();
+        stepSelect.classList.add('d-none');
+        stepCrop.classList.remove('d-none');
+        btnSave.disabled = false;
+
+        naturalWidth = cropImage.naturalWidth;
+        naturalHeight = cropImage.naturalHeight;
+        rotation = 0;
+        currentZoom = 1;
+        zoomRange.value = 1;
+
+        // Viewport center
+        const vpW = cropViewport.clientWidth || 460;
+        const vpH = cropViewport.clientHeight || 350;
+
+        offsetX = vpW / 2;
+        offsetY = vpH / 2;
+
+        recomputeScale();
+        updateTransform();
+    }
+
+    function recomputeScale() {
+        const isRotated90 = (rotation % 180 !== 0);
+        const effW = isRotated90 ? naturalHeight : naturalWidth;
+        const effH = isRotated90 ? naturalWidth : naturalHeight;
+
+        // Scale image so its smallest dimension covers the circle
+        baseScale = CIRCLE_DIAMETER / Math.min(effW, effH);
+        scale = baseScale * currentZoom;
+    }
+
+    function updateTransform() {
+        cropImage.style.transform = `translate(${offsetX}px, ${offsetY}px) translate(-50%, -50%) rotate(${rotation}deg) scale(${scale})`;
+    }
+
+    // Zoom Range input
+    zoomRange.addEventListener('input', function() {
+        currentZoom = parseFloat(this.value);
+        recomputeScale();
+        updateTransform();
+    });
+
+    // Zoom Buttons
+    btnZoomOut.addEventListener('click', function() {
+        let val = parseFloat(zoomRange.value) - 0.15;
+        if (val < 1) val = 1;
+        zoomRange.value = val;
+        currentZoom = val;
+        recomputeScale();
+        updateTransform();
+    });
+
+    btnZoomIn.addEventListener('click', function() {
+        let val = parseFloat(zoomRange.value) + 0.15;
+        if (val > 3) val = 3;
+        zoomRange.value = val;
+        currentZoom = val;
+        recomputeScale();
+        updateTransform();
+    });
+
+    // Rotate Button
+    btnRotate.addEventListener('click', function() {
+        rotation = (rotation + 90) % 360;
+        recomputeScale();
+        updateTransform();
+    });
+
+    // Mouse wheel zoom inside viewport
+    cropViewport.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.1 : -0.1;
+        let val = parseFloat(zoomRange.value) + delta;
+        if (val < 1) val = 1;
+        if (val > 3) val = 3;
+        zoomRange.value = val;
+        currentZoom = val;
+        recomputeScale();
+        updateTransform();
+    }, { passive: false });
+
+    // Drag to position logic (Mouse & Touch)
+    function onPointerDown(clientX, clientY) {
+        isDragging = true;
+        dragStartX = clientX;
+        dragStartY = clientY;
+        imageStartX = offsetX;
+        imageStartY = offsetY;
+        cropViewport.classList.add('is-dragging');
+    }
+
+    function onPointerMove(clientX, clientY) {
+        if (!isDragging) return;
+        const dx = clientX - dragStartX;
+        const dy = clientY - dragStartY;
+        offsetX = imageStartX + dx;
+        offsetY = imageStartY + dy;
+        updateTransform();
+    }
+
+    function onPointerUp() {
+        if (isDragging) {
+            isDragging = false;
+            cropViewport.classList.remove('is-dragging');
+        }
+    }
+
+    // Mouse events
+    cropViewport.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        onPointerDown(e.clientX, e.clientY);
+    });
+
+    window.addEventListener('mousemove', function(e) {
+        onPointerMove(e.clientX, e.clientY);
+    });
+
+    window.addEventListener('mouseup', onPointerUp);
+
+    // Touch events for mobile phones / tablets
+    cropViewport.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 1) {
+            onPointerDown(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', function(e) {
+        if (isDragging && e.touches.length === 1) {
+            onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchend', onPointerUp);
+
+    // Save Cropped Avatar
+    window.saveCroppedAvatar = function() {
+        btnSave.disabled = true;
+        btnSaveText.classList.add('d-none');
+        btnSaveSpinner.classList.remove('d-none');
+        hideAlert();
+
+        try {
+            // High-resolution output canvas 500x500
+            const canvas = document.createElement('canvas');
+            const CANVAS_SIZE = 500;
+            canvas.width = CANVAS_SIZE;
+            canvas.height = CANVAS_SIZE;
+            const ctx = canvas.getContext('2d');
+
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+
+            const vpW = cropViewport.clientWidth || 460;
+            const vpH = cropViewport.clientHeight || 350;
+            const vpCenterX = vpW / 2;
+            const vpCenterY = vpH / 2;
+
+            const ratio = CANVAS_SIZE / CIRCLE_DIAMETER;
+
+            // Center canvas
+            ctx.translate(CANVAS_SIZE / 2, CANVAS_SIZE / 2);
+
+            // Relative offset from circle center
+            const relX = (offsetX - vpCenterX) * ratio;
+            const relY = (offsetY - vpCenterY) * ratio;
+            ctx.translate(relX, relY);
+
+            // Apply rotation
+            ctx.rotate(rotation * Math.PI / 180);
+
+            // Draw image
+            const drawW = naturalWidth * scale * ratio;
+            const drawH = naturalHeight * scale * ratio;
+            ctx.drawImage(cropImage, -drawW / 2, -drawH / 2, drawW, drawH);
+
+            // Convert to JPEG Blob
+            canvas.toBlob(function(blob) {
+                if (!blob) {
+                    showAlert('Không thể xử lý hình ảnh. Vui lòng thử lại.');
+                    resetSaveBtn();
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('avatar', blob, 'avatar.jpg');
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                fetch("{% url 'accounts:update_avatar' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        applyNewAvatar(data.avatar_url, data.message || 'Cập nhật ảnh đại diện thành công!');
+                        avatarModal.hide();
+                    } else {
+                        showAlert(data.message || 'Có lỗi xảy ra khi lưu ảnh.');
+                    }
+                })
+                .catch(err => {
+                    showAlert('Lỗi kết nối máy chủ. Vui lòng thử lại.');
+                })
+                .finally(() => {
+                    resetSaveBtn();
+                });
+            }, 'image/jpeg', 0.92);
+
+        } catch (err) {
+            showAlert('Lỗi xử lý ảnh: ' + err.message);
+            resetSaveBtn();
+        }
+    };
+
+    function resetSaveBtn() {
+        btnSave.disabled = false;
+        btnSaveText.classList.remove('d-none');
+        btnSaveSpinner.classList.add('d-none');
+    }
+
+    // Delete Avatar Handler
+    window.deleteCurrentAvatar = function() {
+        if (!confirm('Bạn có chắc muốn gỡ ảnh đại diện hiện tại và quay về ảnh mặc định?')) {
+            return;
+        }
+
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        fetch("{% url 'accounts:delete_avatar' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                applyNewAvatar(data.avatar_url, data.message || 'Đã đặt lại ảnh đại diện mặc định!');
+                avatarModal.hide();
+                // Hide delete button if reverted to default
+                const delBtn = document.getElementById('btn-delete-avatar');
+                if (delBtn) delBtn.classList.add('d-none');
+            } else {
+                alert(data.message || 'Có lỗi xảy ra.');
+            }
+        })
+        .catch(err => {
+            alert('Lỗi kết nối máy chủ.');
+        });
+    };
+
+    // Update avatar across the page instantly
+    function applyNewAvatar(url, msg) {
+        const bustUrl = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+
+        // 1. Profile Sidebar Card
+        const profileImg = document.getElementById('profile-avatar-img');
+        if (profileImg) profileImg.src = bustUrl;
+
+        // 2. Right form preview
+        const formImg = document.getElementById('form-avatar-preview');
+        if (formImg) formImg.src = bustUrl;
+
+        // 3. Navbar header avatar
+        document.querySelectorAll('.navbar .avatar-img').forEach(img => {
+            img.src = bustUrl;
+        });
+
+        // 4. Show success toast alert
+        const toast = document.getElementById('avatar-toast-alert');
+        const toastMsg = document.getElementById('avatar-toast-message');
+        if (toast && toastMsg) {
+            toastMsg.textContent = msg;
+            toast.classList.remove('d-none');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.classList.add('d-none'), 300);
+            }, 4000);
+        }
+    }
+})();
+</script>
+{% endblock %}

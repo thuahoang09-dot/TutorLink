@@ -1,0 +1,104 @@
+{% extends 'dashboard/admin_base.html' %}
+{% load static %}
+
+{% block title %}Kiểm duyệt gia sư – TutorLink Admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h3 class="fw-bold mb-1">Kiểm Duyệt Hồ Sơ Gia Sư</h3>
+        <p class="text-muted small mb-0">Xem xét trình độ, bằng cấp, kinh nghiệm và quyết định phê duyệt gia sư</p>
+    </div>
+    <div class="btn-group">
+        <a href="{% url 'dashboard:admin_tutors' %}?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-danger{% else %}btn-outline-danger{% endif %}">
+            Chờ duyệt ({{ pending_tutor_approvals_count }})
+        </a>
+        <a href="{% url 'dashboard:admin_tutors' %}?status=approved" class="btn btn-sm {% if status_filter == 'approved' %}btn-success{% else %}btn-outline-success{% endif %}">
+            Đã duyệt
+        </a>
+        <a href="{% url 'dashboard:admin_tutors' %}?status=rejected" class="btn btn-sm {% if status_filter == 'rejected' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+            Bị từ chối
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for tutor in tutors %}
+        <div class="col-12">
+            <div class="card card-custom p-4">
+                <div class="row align-items-center">
+                    <div class="col-lg-7 d-flex align-items-start gap-3">
+                        <img src="{{ tutor.avatar_url }}" alt="avatar" class="avatar-img avatar-lg flex-shrink-0">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h5 class="fw-bold mb-0">{{ tutor.full_name }}</h5>
+                                <span class="badge badge-status {% if tutor.approval_status == 'approved' %}status-approved{% elif tutor.approval_status == 'rejected' %}status-rejected{% else %}status-pending{% endif %}">
+                                    {{ tutor.get_approval_status_display }}
+                                </span>
+                            </div>
+                            <div class="text-muted small mb-2">
+                                <i class="bi bi-geo-alt text-danger"></i> {{ tutor.location }} • 
+                                <i class="bi bi-telephone text-primary"></i> {{ tutor.phone|default:"Chưa có sđt" }} • 
+                                <i class="bi bi-cash text-success"></i> {{ tutor.price_per_hour }} đ/h
+                            </div>
+                            <div class="small mb-1">
+                                <strong>Học vấn / Bằng cấp:</strong> {{ tutor.education|default:"Chưa cập nhật" }}
+                            </div>
+                            {% if tutor.certificates.exists or tutor.certificate_file %}
+                                <div class="small mb-2 p-2 rounded bg-light border">
+                                    <strong class="text-primary"><i class="bi bi-file-earmark-check-fill me-1"></i>Minh chứng kiểm duyệt ({{ tutor.certificates.count }} tệp):</strong>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        {% for cert in tutor.certificates.all %}
+                                            <a href="{{ cert.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill" style="font-size: 0.78rem;" title="{{ cert.filename }}">
+                                                <i class="bi {% if cert.is_pdf %}bi-file-earmark-pdf-fill text-danger{% else %}bi-file-earmark-image-fill text-success{% endif %} me-1"></i>{{ cert.title|default:cert.filename|truncatechars:20 }}
+                                            </a>
+                                        {% endfor %}
+                                        {% if tutor.certificate_file and not tutor.certificates.exists %}
+                                            <a href="{{ tutor.certificate_file.url }}" target="_blank" class="btn btn-sm btn-outline-danger py-0 px-2 rounded-pill" style="font-size: 0.78rem;">
+                                                <i class="bi bi-file-earmark-text me-1"></i>Tệp minh chứng
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <div class="small mb-2">
+                                <strong>Kinh nghiệm:</strong> {{ tutor.experience|default:"Chưa cập nhật" }}
+                            </div>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for sub in tutor.subjects.all %}
+                                    <span class="badge bg-light text-primary border small">{{ sub.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5 text-lg-end mt-3 mt-lg-0">
+                        <form method="post" action="{% url 'dashboard:admin_approve_tutor' tutor.id %}" class="bg-light p-3 rounded-3 border">
+                            {% csrf_token %}
+                            <div class="mb-2">
+                                <input type="text" name="feedback" class="form-control form-control-sm" placeholder="Ghi chú phản hồi cho gia sư..." value="{{ tutor.admin_feedback }}">
+                            </div>
+                            <div class="d-flex gap-2 justify-content-lg-end">
+                                <a href="{% url 'tutors:tutor_detail' tutor.id %}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-eye"></i> Xem trang
+                                </a>
+                                <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">
+                                    <i class="bi bi-check2-circle"></i> Duyệt
+                                </button>
+                                <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-x-circle"></i> Từ chối
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12 text-center py-5 text-muted">
+            <i class="bi bi-check-circle fs-1 text-success d-block mb-2"></i>
+            Không có gia sư nào trong danh sách bộ lọc này.
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
