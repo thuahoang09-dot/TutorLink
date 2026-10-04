@@ -74,6 +74,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
     # TutorLink Apps
     'accounts',
     'tutors',
@@ -169,6 +171,18 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Use Cloudinary for uploaded media on Vercel/production when CLOUDINARY_URL is set.
+# Without CLOUDINARY_URL (for example, local IDE development), Django keeps using local media/ storage.
+if os.environ.get('CLOUDINARY_URL'):
+    STORAGES = {
+        'default': {
+            'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
