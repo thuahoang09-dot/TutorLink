@@ -205,6 +205,113 @@
     <div class="row g-4">
         <!-- Main Content Area: CHUẨN TRUNG TÂM GIA SƯ UY TÍN -->
         <div class="col-lg-8">
+
+            {% if user.is_authenticated and user_profile.is_admin_user or user == tutor.user %}
+                <!-- Admin & Self Exclusive Identity Inspection Panel -->
+                <div class="card border-primary shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between py-2.5">
+                        <span class="fw-bold"><i class="bi bi-shield-lock-fill me-2"></i> KHO BẢO MẬT & XÁC THỰC DANH TÍNH GIA SƯ {% if user_profile.is_admin_user %}(Dành Cho Admin){% else %}(Hồ sơ cá nhân của bạn){% endif %}</span>
+                        <span class="badge bg-white text-primary fw-semibold">Quyền Riêng Tư Cao Nhất</span>
+                    </div>
+                    <div class="card-body bg-light">
+                        <div class="row g-3">
+                            <!-- Thông tin liên hệ cá nhân -->
+                            <div class="col-md-6 border-end-md">
+                                <h6 class="fw-bold text-dark border-bottom pb-1 mb-2"><i class="bi bi-person-vcard text-primary me-1"></i> Thông Tin Liên Hệ Khảo Sát</h6>
+                                <ul class="list-unstyled small text-secondary mb-0 d-flex flex-column gap-1.5">
+                                    <li><strong class="text-dark"><i class="bi bi-telephone-fill text-primary me-1"></i> Số điện thoại:</strong> <a href="tel:{{ tutor.phone }}" class="fw-bold text-dark text-decoration-none">{{ tutor.phone|default:"Chưa cập nhật" }}</a></li>
+                                    <li><strong class="text-dark"><i class="bi bi-envelope-fill text-danger me-1"></i> Email tài khoản:</strong> <span class="text-dark">{{ tutor.user.email|default:"Chưa có email" }}</span></li>
+                                    <li><strong class="text-dark"><i class="bi bi-facebook text-primary me-1"></i> Kết nối Facebook:</strong> 
+                                        {% if tutor.facebook_link %}
+                                            <a href="{{ tutor.facebook_link }}" target="_blank" class="fw-semibold text-primary">Xem trang Facebook <i class="bi bi-box-arrow-up-right small"></i></a>
+                                        {% else %}
+                                            <span class="text-muted">Chưa cập nhật</span>
+                                        {% endif %}
+                                    </li>
+                                    <li><strong class="text-dark"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Địa chỉ chi tiết:</strong> {{ tutor.detailed_address|default:tutor.location|default:"Chưa cập nhật" }}</li>
+                                    <li><strong class="text-dark"><i class="bi bi-calendar-event me-1"></i> Ngày sinh / Quê quán:</strong> {{ tutor.birth_date|default:tutor.birth_year|default:"--" }} • {{ tutor.hometown|default:"--" }}</li>
+                                </ul>
+                            </div>
+
+                            <!-- Ảnh CCCD / CMT & Thẻ sinh viên minh chứng -->
+                            <div class="col-md-6">
+                                <h6 class="fw-bold text-dark border-bottom pb-1 mb-2"><i class="bi bi-file-earmark-person-fill text-danger me-1"></i> Ảnh Căn Cước & Thẻ SV/Bằng Cấp Gốc</h6>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="p-2 border rounded bg-white text-center">
+                                            <div class="fw-semibold text-muted mb-1" style="font-size: 0.7rem;">CCCD/CMT Mặt Trước</div>
+                                            {% if tutor.id_card_front %}
+                                                <a href="{{ tutor.id_card_front.url }}" target="_blank">
+                                                    <img src="{{ tutor.id_card_front.url }}" class="img-fluid rounded border shadow-sm" style="max-height: 80px; object-fit: cover; width: 100%;">
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted small">Chưa tải lên</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-2 border rounded bg-white text-center">
+                                            <div class="fw-semibold text-muted mb-1" style="font-size: 0.7rem;">Thẻ SV / Bằng Cấp 1</div>
+                                            {% if tutor.student_card_1 %}
+                                                <a href="{{ tutor.student_card_1.url }}" target="_blank">
+                                                    <img src="{{ tutor.student_card_1.url }}" class="img-fluid rounded border shadow-sm" style="max-height: 80px; object-fit: cover; width: 100%;">
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted small">Chưa tải lên</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% if tutor.student_card_2 %}
+                                        <div class="col-6">
+                                            <div class="p-2 border rounded bg-white text-center">
+                                                <div class="fw-semibold text-muted mb-1" style="font-size: 0.7rem;">Thẻ SV / Bằng Cấp 2</div>
+                                                <a href="{{ tutor.student_card_2.url }}" target="_blank">
+                                                    <img src="{{ tutor.student_card_2.url }}" class="img-fluid rounded border shadow-sm" style="max-height: 80px; object-fit: cover; width: 100%;">
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    {% if tutor.student_card_3 %}
+                                        <div class="col-6">
+                                            <div class="p-2 border rounded bg-white text-center">
+                                                <div class="fw-semibold text-muted mb-1" style="font-size: 0.7rem;">Thẻ SV / Bằng Cấp 3</div>
+                                                <a href="{{ tutor.student_card_3.url }}" target="_blank">
+                                                    <img src="{{ tutor.student_card_3.url }}" class="img-fluid rounded border shadow-sm" style="max-height: 80px; object-fit: cover; width: 100%;">
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Form Phê duyệt Admin nếu user là Admin -->
+                            {% if user_profile.is_admin_user %}
+                                <div class="col-12 border-top pt-3 mt-2">
+                                    <div class="p-3 bg-white border rounded shadow-sm">
+                                        <h6 class="fw-bold text-primary mb-2"><i class="bi bi-sliders me-1"></i> Khung Phê Duyệt Nhanh Dành Cho Quản Trị Viên</h6>
+                                        <form method="post" action="{% url 'dashboard:admin_approve_tutor' tutor.id %}" class="row g-2 align-items-center">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="next" value="{{ request.path }}">
+                                            <div class="col-md-7">
+                                                <input type="text" name="feedback" class="form-control form-control-sm" placeholder="Nhập nhận xét / lý do phản hồi cho gia sư..." value="{{ tutor.admin_feedback }}">
+                                            </div>
+                                            <div class="col-md-5 d-flex gap-2 justify-content-md-end">
+                                                <button type="submit" name="action" value="approve" class="btn btn-success btn-sm fw-bold px-3 shadow-sm">
+                                                    <i class="bi bi-check-circle-fill me-1"></i> Phê Duyệt Hồ Sơ
+                                                </button>
+                                                <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm fw-bold px-3 shadow-sm">
+                                                    <i class="bi bi-x-circle-fill me-1"></i> Từ Chối Hồ Sơ
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
             <div class="tt-profile-card shadow-sm mb-4">
                 <!-- 1. BANNER: THÔNG TIN GIA SƯ -->
                 <div class="tt-section-banner">

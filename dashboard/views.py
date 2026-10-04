@@ -187,6 +187,10 @@ def admin_approve_tutor(request, tutor_id):
         tutor.admin_feedback = feedback
         tutor.save()
 
+        next_url = request.POST.get('next', '').strip()
+        if next_url:
+            return redirect(next_url)
+
     return redirect('dashboard:admin_tutors')
 
 @login_required

@@ -25,16 +25,14 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v={% now 'U' %}">
     {% block extra_css %}{% endblock %}
 
-    <!-- Early theme & language init & control script -->
+    <!-- Early theme init & control script -->
     <script>
-        // Early Theme & Language Init (Prevents flicker)
+        // Early Theme Init (Prevents flicker)
         (function() {
             try {
                 const savedTheme = localStorage.getItem('tutorlink_theme') || 'light';
                 document.documentElement.setAttribute('data-bs-theme', savedTheme);
-                const savedLang = localStorage.getItem('tutorlink_lang') || 'vi';
-                document.documentElement.setAttribute('lang', savedLang);
-                document.documentElement.setAttribute('data-lang', savedLang);
+                localStorage.removeItem('tutorlink_lang');
             } catch(e) {}
         })();
 
@@ -70,8 +68,6 @@
             window.syncThemeUI();
         });
     </script>
-    <!-- Dedicated TutorLink Bilingual i18n Engine -->
-    <script src="{% static 'js/i18n.js' %}?v={% now 'U' %}"></script>
 </head>
 <body>
 
@@ -306,36 +302,7 @@
                                     </div>
                                 </li>
 
-                                <!-- Language Switcher Inside Dropdown -->
-                                <li class="px-3 py-1.5" onclick="event.stopPropagation();">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <span class="small fw-semibold d-flex align-items-center gap-2 text-muted">
-                                            <i class="bi bi-translate text-success fs-6"></i>
-                                            <span data-i18n="lang_label">Ngôn ngữ</span>
-                                        </span>
-                                        <div class="lang-switcher-segment" id="lang-switcher-group" role="group">
-                                            <button type="button" class="lang-seg-btn active" id="btn-lang-vi" onclick="setLanguage('vi'); event.stopPropagation();" title="Tiếng Việt" data-i18n-title="lang_vi" aria-label="Tiếng Việt">
-                                                <span class="flag-circle">
-                                                    <svg width="20" height="20" viewBox="0 0 32 32">
-                                                        <rect width="32" height="32" fill="#da251d"/>
-                                                        <polygon points="16,6.5 18.9,13.5 26,13.5 20.2,18 22.3,25.5 16,21 9.7,25.5 11.8,18 6,13.5 13.1,13.5" fill="#ffff00"/>
-                                                    </svg>
-                                                </span>
-                                            </button>
-                                            <button type="button" class="lang-seg-btn" id="btn-lang-en" onclick="setLanguage('en'); event.stopPropagation();" title="English" data-i18n-title="lang_en" aria-label="English">
-                                                <span class="flag-circle">
-                                                    <svg width="20" height="20" viewBox="0 0 32 32">
-                                                        <rect width="32" height="32" fill="#012169"/>
-                                                        <path d="M0,0 L32,32 M32,0 L0,32" stroke="#fff" stroke-width="6"/>
-                                                        <path d="M0,0 L32,32 M32,0 L0,32" stroke="#c8102e" stroke-width="2"/>
-                                                        <path d="M16,0 V32 M0,16 H32" stroke="#fff" stroke-width="10"/>
-                                                        <path d="M16,0 V32 M0,16 H32" stroke="#c8102e" stroke-width="6"/>
-                                                    </svg>
-                                                </span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </li>
+
 
                                 <li><hr class="dropdown-divider my-2"></li>
                                 <li>
@@ -376,35 +343,7 @@
                                         </div>
                                     </div>
                                 </li>
-                                <li class="px-3 py-1.5" onclick="event.stopPropagation();">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <span class="small fw-semibold d-flex align-items-center gap-2 text-muted">
-                                            <i class="bi bi-translate text-success fs-6"></i>
-                                            <span data-i18n="lang_label">Ngôn ngữ</span>
-                                        </span>
-                                        <div class="lang-switcher-segment" role="group">
-                                            <button type="button" class="lang-seg-btn guest-btn-lang-vi" onclick="setLanguage('vi'); event.stopPropagation();" title="Tiếng Việt" data-i18n-title="lang_vi" aria-label="Tiếng Việt">
-                                                <span class="flag-circle">
-                                                    <svg width="20" height="20" viewBox="0 0 32 32">
-                                                        <rect width="32" height="32" fill="#da251d"/>
-                                                        <polygon points="16,6.5 18.9,13.5 26,13.5 20.2,18 22.3,25.5 16,21 9.7,25.5 11.8,18 6,13.5 13.1,13.5" fill="#ffff00"/>
-                                                    </svg>
-                                                </span>
-                                            </button>
-                                            <button type="button" class="lang-seg-btn guest-btn-lang-en" onclick="setLanguage('en'); event.stopPropagation();" title="English" data-i18n-title="lang_en" aria-label="English">
-                                                <span class="flag-circle">
-                                                    <svg width="20" height="20" viewBox="0 0 32 32">
-                                                        <rect width="32" height="32" fill="#012169"/>
-                                                        <path d="M0,0 L32,32 M32,0 L0,32" stroke="#fff" stroke-width="6"/>
-                                                        <path d="M0,0 L32,32 M32,0 L0,32" stroke="#c8102e" stroke-width="2"/>
-                                                        <path d="M16,0 V32 M0,16 H32" stroke="#fff" stroke-width="10"/>
-                                                        <path d="M16,0 V32 M0,16 H32" stroke="#c8102e" stroke-width="6"/>
-                                                    </svg>
-                                                </span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </li>
+
                             </ul>
                         </li>
                         <li class="nav-item me-2">
