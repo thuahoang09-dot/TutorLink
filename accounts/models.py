@@ -44,6 +44,9 @@ class UserProfile(models.Model):
 
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
+    if kwargs.get('raw'):
+        return
+
     if created:
         role = 'admin' if (instance.is_superuser or instance.is_staff) else 'student'
         UserProfile.objects.create(
